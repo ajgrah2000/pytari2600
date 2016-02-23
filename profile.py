@@ -20,7 +20,7 @@ if cmd_args.rerun:
   pytari_args = Args()
   pytari_args.cart_type='default'
 #  pytari_args.cart_type='single_bank'
-  pytari_args.cartridge_name='../atari2600/roms/Pitfall!.bin'
+  pytari_args.cartridge_name='roms/sample_rom.bin'
   pytari_args.debug=False
   pytari_args.no_delay=False
   pytari_args.stop_clock=4000000
