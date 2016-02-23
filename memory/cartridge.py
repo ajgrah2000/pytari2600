@@ -445,7 +445,7 @@ class GenericCartridge(object):
 
                 if (bytes_read > 0) and (bytes_read < self.bank_size):
                     # If the bank is short, pad it with zeros.
-                    bank += bytearray('\000'.encode(encoding="utf-8") * (self.bank_size-bytes_read))
+                    bank += bytearray('\000'.encode() * (self.bank_size-bytes_read))
                     # If the read size was less than a half bank, copy the
                     # shortfall.
                     if bytes_read <= int(self.bank_size/2):
