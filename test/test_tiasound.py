@@ -44,7 +44,6 @@ class TestTiaSound(unittest.TestCase):
 
 #                sys.stdout.write("%d"%(poly4_state & 1))
                 poly5_state = next_poly5
-#            print ""
 
     def test_hex_combo(self):
         for audio_ctrl in range(0x10):
@@ -99,19 +98,19 @@ class TestStretch(unittest.TestCase):
     def test_stretch(self):
         stretch = audio.tiasound.Stretch()
         a = [1,0,1,0,1,0,1,0]
-        print "orig:", a
-        print stretch.stretch(a)
+        print("orig:", a)
+        print(stretch.stretch(a))
 
         stretch.rate = 80
         b = stretch.stretch(a)
-        print b
+        print(b)
 
         stretch.rate = 70
-        print stretch.stretch(a)
-        print stretch.stretch(a)
+        print(stretch.stretch(a))
+        print(stretch.stretch(a))
 
         stretch.rate = 120
-        print stretch.stretch(a)
+        print(stretch.stretch(a))
 
 if __name__ == '__main__':
     unittest.main()

@@ -43,7 +43,7 @@ class TestDrawing(unittest.TestCase):
             shift = 0
             bits = 0
             
-            i = x/pixelWidth
+            i = int(x/pixelWidth)
             
             if i >= 20:
                 if 0 == (ctrlpf & 0x1):
@@ -84,7 +84,7 @@ class TestDrawing(unittest.TestCase):
                     for i in range(8):
                         # TODO: 'size/2' is a workaround for 'missile command'
                         # shifting of the explosion when size increases.
-                        pos = (resp - graphics.stella.Stella.HORIZONTAL_BLANK + size/2 + i*size + s + n * gap*8) % graphics.stella.Stella.FRAME_WIDTH & 0xFF
+                        pos = (resp - graphics.stella.Stella.HORIZONTAL_BLANK + int(size/2) + i*size + s + n * gap*8) % graphics.stella.Stella.FRAME_WIDTH & 0xFF
 
                         if x == pos:
                             if (refp & 0x8) == 0:
