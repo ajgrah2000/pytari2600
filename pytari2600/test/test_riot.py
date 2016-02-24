@@ -1,14 +1,14 @@
-import inputs
-import memory.riot
-import clocks
+import pytari2600.inputs
+import pytari2600.memory.riot
+import pytari2600.clocks
 import unittest
 
 class TestRiot(unittest.TestCase):
     def test_riot(self):
-        clock = clocks.Clock()
+        clock = pytari2600.clocks.Clock()
         clock.system_clock = 100337
-        test_input = inputs.Input()
-        riot_test = memory.riot.Riot(clock, test_input)
+        test_input = pytari2600.inputs.Input()
+        riot_test = pytari2600.memory.riot.Riot(clock, test_input)
 
         riot_test.write(0x100, 7)
         self.assertEqual(riot_test.read(0x100), 7)

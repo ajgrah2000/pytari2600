@@ -7,23 +7,23 @@ import atari2600
 
 # Possible audio drivers
 audio_options = {
-    'pygame':      'from audio.pygameaudio import PygameStretchTIA_Sound as AudioDriver',
-    'wav':         'from audio.testaudio import WAV_TIA_Sound as AudioDriver',
-    'oss':         'from audio.testaudio import OSS_TIA_Sound as AudioDriver',
-    'oss_stretch': 'from audio.testaudio import OSS_StretchTIA_Sound as AudioDriver',
-    'tia_dummy' :  'from audio.tiasound import TIA_Sound as AudioDriver'
+    'pygame':      'from pytari2600.audio.pygameaudio import PygameStretchTIA_Sound as AudioDriver',
+    'wav':         'from pytari2600.audio.testaudio import WAV_TIA_Sound as AudioDriver',
+    'oss':         'from pytari2600.audio.testaudio import OSS_TIA_Sound as AudioDriver',
+    'oss_stretch': 'from pytari2600.audio.testaudio import OSS_StretchTIA_Sound as AudioDriver',
+    'tia_dummy' :  'from pytari2600.audio.tiasound import TIA_Sound as AudioDriver'
     }
 
 # Possible graphics drivers
 graphics_options = {
-    'pyglet': 'from graphics.pygletstella import PygletStella as Graphics',
-    'pygame': 'from graphics.pygamestella import PygameStella as Graphics'
+    'pyglet': 'from pytari2600.graphics.pygletstella import PygletStella as Graphics',
+    'pygame': 'from pytari2600.graphics.pygamestella import PygameStella as Graphics'
     }
 
 # Possible graphics drivers
 cpu_options = {
-    'cpu_gen': 'import cpu_gen as cpu',
-    'cpu': 'import cpu as cpu'
+    'cpu_gen': 'import pytari2600.cpu_gen as cpu',
+    'cpu': 'import pytari2600.cpu as cpu'
     }
 
 def config(graphics_selection, audio_selection, cpu_selection):

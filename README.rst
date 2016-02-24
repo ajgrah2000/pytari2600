@@ -3,6 +3,7 @@ python based atari 2600 emulator
 
 Python atari2600 emulator
 =========================
+|license| |build|
 
 Atari2600 emulator written in Python.
 
@@ -20,6 +21,12 @@ Module dependencies:
    numpy (optional)
    pyglet (optional, not fully supported)
 
+Create package:
+   python setup.py sdist
+Install:
+   python setup.py install 
+Run (show help):
+   python -m pytari2600
 
    usage: pytari2600.py [-h] [-d] [-r REPLAY_FILE] [-s STOP_CLOCK]
                         [-c {default,pb,mnet,cbs,e,fe,super,f4,single_bank}]
@@ -27,17 +34,30 @@ Module dependencies:
                         [-a {oss_stretch,wav,oss,pygame,tia_dummy}] [-n]
                         cartridge_name
 
+Keys
+====
+arrow keys - move
+z - Fire button
+s - Select
+r - Reset
+1 - difficulty
+2 - difficulty
+[ - save state (if -r has been specified)
+] - restore state (if -r has been specified)
+
+Example startup
+===============
 Examples (no audio by default, as audio is too flakey):
 
-python pytari2600.py myrom.bin
+python -m pytari2600 myrom.bin
 
 For different cartridge type: 
-python pytari2600.py -c cbs my_cbs_rom.bin
+python -m pytari2600 -c cbs my_cbs_rom.bin
 
 Save audio to 'pytari.wav' file, no audio during play (for your listening pleasure when you've finished playing) 
-python pytari2600.py -a wav my_cbs_rom.bin
+python -m pytari2600 -a wav my_cbs_rom.bin
 
-pypy pytari2600.py my_cbs_rom.bin
+pypy -m pytari2600 my_cbs_rom.bin
 
 
 Issues:
@@ -60,3 +80,13 @@ TODO:
     - More undocumented opcoded (I've generally added op-codes as I encounter them).
     - Pick another name, 'pytari' appears to be used for another python atari
       emulator, so 'pytari2600' isn't particularly original.
+    - Ensure that creating the setup.py package hasn't broken anything.
+
+
+.. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
+   :target: https://raw.githubusercontent.com/agraham/pytari2600/master/LICENSE
+   :alt: MIT License
+
+.. |build| image:: https://travis-ci.org/ajgrah2000/pytari2600.svg?branch=master
+   :target: https://travis-ci.org/ajgrah2000/pytari2600
+   :alt: Continuous Integration

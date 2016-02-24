@@ -1,7 +1,7 @@
 import pygame.mixer
 import time
 import wave
-import audio.testaudio
+import pytari2600.audio.testaudio
 
 class TestReadWAV_Sound(object):
     def __init__(self, filenames):
