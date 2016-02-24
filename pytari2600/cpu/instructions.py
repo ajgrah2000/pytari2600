@@ -319,7 +319,7 @@ class InstructionExec(object):
             # self.pc_state.P.V = (rc != r) ? 1:0;   # Overflow
 
             self.pc_state.P.set_C((0,1)[(r > 99) or (r < 0)])
-            result = (((((r/10) % 10) << 4) & 0xf0) + (r%10))
+            result = ((((int(r/10) % 10) << 4) & 0xf0) + (r%10))
 
         return result & 0xFF
 

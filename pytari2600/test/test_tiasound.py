@@ -99,19 +99,19 @@ class TestStretch(unittest.TestCase):
     def test_stretch(self):
         stretch = pytari2600.audio.tiasound.Stretch()
         a = [1,0,1,0,1,0,1,0]
-        print "orig:", a
-        print stretch.stretch(a)
+        print("orig:", a)
+        print(stretch.stretch(a))
 
         stretch.rate = 80
         b = stretch.stretch(a)
-        print b
+        print(b)
 
         stretch.rate = 70
-        print stretch.stretch(a)
-        print stretch.stretch(a)
+        print(stretch.stretch(a))
+        print(stretch.stretch(a))
 
         stretch.rate = 120
-        print stretch.stretch(a)
+        print(stretch.stretch(a))
 
 if __name__ == '__main__':
     unittest.main()
