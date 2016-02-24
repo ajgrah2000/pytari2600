@@ -1,6 +1,6 @@
-import cpu.addressing as addressing
-import cpu.instructions as instructions
-import cpu.pc_state as pc_state
+from pytari2600.cpu import addressing as addressing
+from pytari2600.cpu import instructions as instructions
+from pytari2600.cpu import pc_state as pc_state
 
 class Core(object):
     """

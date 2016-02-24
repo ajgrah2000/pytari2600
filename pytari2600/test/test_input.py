@@ -1,11 +1,11 @@
-import inputs
+import pytari2600.inputs
 import unittest
 import time
 import pygame
 
 class TestInput(unittest.TestCase):
     def test_input(self):
-        i = inputs.Input()
+        i = pytari2600.inputs.Input()
         test_inputs = [(pygame.KEYDOWN, {'key':pygame.K_1}),
                        (pygame.KEYDOWN, {'key':pygame.K_2}),
                        (pygame.KEYDOWN, {'key':pygame.K_2}),

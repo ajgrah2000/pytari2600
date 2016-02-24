@@ -1,10 +1,10 @@
-import pc_state
+import pytari2600.pc_state
 import unittest
 
 class TestAddressing(unittest.TestCase):
 
     def test_pc_status(self):
-        status_flags = pc_state.PC_StatusFlags()
+        status_flags = pytari2600.pc_state.PC_StatusFlags()
         self.assertEqual(status_flags.value.value, 0)
         status_flags.set_X1(0)
         self.assertEqual(status_flags.value.value, 0)

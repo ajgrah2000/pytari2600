@@ -1,6 +1,6 @@
-import cpu.instructions as instructions
-import cpu.addressing
-import cpu.pc_state
+import pytari2600.cpu.instructions as instructions
+import pytari2600.cpu.addressing
+import pytari2600.cpu.pc_state
 import unittest
 
 class DummyClocks(object):
@@ -32,7 +32,7 @@ class DummyMemory(object):
 class TestInstructions(unittest.TestCase):
 
     def test_reading(self):
-        current_pc_state = cpu.pc_state.PC_State()
+        current_pc_state = pytari2600.cpu.pc_state.PC_State()
         memory   = DummyMemory()
 
         memory.dummy_read = 2
@@ -51,7 +51,7 @@ class TestInstructions(unittest.TestCase):
         self.assertEqual(reading.read(1), 8)
 
     def test_writing(self):
-        current_pc_state = cpu.pc_state.PC_State()
+        current_pc_state = pytari2600.cpu.pc_state.PC_State()
         memory   = DummyMemory()
         writing = instructions.Writing(current_pc_state, memory)
         writing.write(0,20)
@@ -76,7 +76,7 @@ class TestInstructions(unittest.TestCase):
 class TestInstructionExec(unittest.TestCase):
 
     def test_simple_exec(self):
-        current_pc_state = cpu.pc_state.PC_State()
+        current_pc_state = pytari2600.cpu.pc_state.PC_State()
         instruction_exec = instructions.InstructionExec(current_pc_state)
 
         data = 7
@@ -124,12 +124,12 @@ class TestInstructions(unittest.TestCase):
 
         clocks = DummyClocks()
         clocks.system_clocks = 10000
-        current_pc_state = cpu.pc_state.PC_State()
+        current_pc_state = pytari2600.cpu.pc_state.PC_State()
         memory   = DummyMemory()
         instruction_exec = instructions.InstructionExec(current_pc_state).OR_exec
         read  = instructions.Reading(current_pc_state, memory)
         write = instructions.Writing(current_pc_state, memory)
-        address = cpu.addressing.AddressIZX(current_pc_state, memory)
+        address = pytari2600.cpu.addressing.AddressIZX(current_pc_state, memory)
 
         instruction = []
         instruction.append(instructions.Instruction(clocks, current_pc_state, instruction_exec))

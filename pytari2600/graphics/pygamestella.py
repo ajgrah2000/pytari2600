@@ -1,5 +1,5 @@
 import pygame
-import graphics.stella as stella
+import pytari2600.graphics.stella as stella
 
 # Import numpy, if it exists.
 try:

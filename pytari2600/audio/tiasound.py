@@ -165,7 +165,7 @@ class Stretch(object):
 
             self.remainder += self.rate
 
-            increment = int(self.remainder/self.divisor)
+            increment = self.remainder/self.divisor
             self.remainder = self.remainder%self.divisor
 
             source_pos += increment
