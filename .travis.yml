@@ -9,4 +9,6 @@ before_install:
 install:
     - "pip install -r requirements.txt"
 script:
-    - "python -m unit_tests"
+    coverage run --source=pytari2600 unit_tests.py
+after_success:
+    coveralls
