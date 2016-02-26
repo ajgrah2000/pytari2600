@@ -1,4 +1,4 @@
-import audio.tiasound
+from . import tiasound
 import wave
 import pygame.mixer
 import pygame.locals

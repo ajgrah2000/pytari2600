@@ -1,4 +1,4 @@
-import pytari2600.cpu.addressing
+import pytari2600.cpu.addressing as addressing
 import unittest
 
 class DummyPC_State(object):
@@ -23,37 +23,37 @@ class TestAddressing(unittest.TestCase):
     def test_addressing(self):
         pc_state = DummyPC_State()
         memory   = DummyMemory()
-        address = pytari2600.cpu.addressing.AddressIZX(pc_state, memory)
+        address = addressing.AddressIZX(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 4*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 1)
-        address = pytari2600.cpu.addressing.AddressZPX(pc_state, memory)
+        address = addressing.AddressZPX(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 2*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 1)
-        address = pytari2600.cpu.addressing.AddressZPY(pc_state, memory)
+        address = addressing.AddressZPY(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 2*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 1)
-        address = pytari2600.cpu.addressing.AddressZP(pc_state, memory)
+        address = addressing.AddressZP(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 1*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 1)
-        address = pytari2600.cpu.addressing.AddressIMM(pc_state, memory)
+        address = addressing.AddressIMM(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 0*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 1)
-        address = pytari2600.cpu.addressing.AddressIZY(pc_state, memory)
+        address = addressing.AddressIZY(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 3*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 1)
-        address = pytari2600.cpu.addressing.AddressAbs(pc_state, memory)
+        address = addressing.AddressAbs(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 2*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 2)
-        address = pytari2600.cpu.addressing.AddressIndirect(pc_state, memory)
+        address = addressing.AddressIndirect(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 4*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 2)
-        address = pytari2600.cpu.addressing.AddressAby(pc_state, memory) # Page delay
+        address = addressing.AddressAby(pc_state, memory) # Page delay
         self.assertEqual(address.get_addressing_time(), 2*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 2)
-        address = pytari2600.cpu.addressing.AddressAbx(pc_state, memory)
+        address = addressing.AddressAbx(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 2*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 2)
-        address = pytari2600.cpu.addressing.AddressAccumulator(pc_state, memory)
+        address = addressing.AddressAccumulator(pc_state, memory)
         self.assertEqual(address.get_addressing_time(), 0*pc_state.CYCLES_TO_CLOCK)
         self.assertEqual(address.get_addressing_size(), 0)
 

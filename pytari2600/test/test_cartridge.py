@@ -1,11 +1,11 @@
-import pytari2600.memory.cartridge
+import pytari2600.memory.cartridge as cartridge
 import unittest
 import pkg_resources
 
 class TestCartridge(unittest.TestCase):
 
     def test_cartridge(self):
-        cart = pytari2600.memory.cartridge.GenericCartridge(pkg_resources.resource_filename(__name__, 'dummy_rom.bin'), 4, 0x1000, 0xFF9, 0x0)
+        cart = cartridge.GenericCartridge(pkg_resources.resource_filename(__name__, 'dummy_rom.bin'), 4, 0x1000, 0xFF9, 0x0)
         # Write should do nothing
         cart.write(0,7)
         self.assertEqual(cart.read(0), 0)
@@ -13,7 +13,7 @@ class TestCartridge(unittest.TestCase):
         self.assertEqual(cart.read(2048+2), 2)
 
     def test_ram_cartridge(self):
-        cart = pytari2600.memory.cartridge.GenericCartridge(pkg_resources.resource_filename(__name__, 'dummy_rom.bin'), 4, 0x1000, 0xFF9, 0x080)
+        cart = cartridge.GenericCartridge(pkg_resources.resource_filename(__name__, 'dummy_rom.bin'), 4, 0x1000, 0xFF9, 0x080)
         # Write should go to ram.
         cart.write(0,7)
         self.assertEqual(cart.read(0x80), 7)
