@@ -3,7 +3,7 @@ import wave
 import pygame.mixer
 import pygame.locals
 
-class WAV_TIA_Sound(audio.tiasound.TIA_Sound):
+class WAV_TIA_Sound(tiasound.TIA_Sound):
     """ Capture sound (accurately) to a wav file.
         pacat --format=u8 pytari.wav
     """
@@ -28,8 +28,8 @@ class WAV_TIA_Sound(audio.tiasound.TIA_Sound):
         """ Update the 'emulated' audio wave form, based on current time.
         """
         audio_ticks = self.clocks.system_clock - self._last_update_time
-        self._raw_audio[0].extend(self.get_channel_data(0, self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE))
-        self._raw_audio[1].extend(self.get_channel_data(1, self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE))
+        self._raw_audio[0].extend(self.get_channel_data(0, (self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE)))
+        self._raw_audio[1].extend(self.get_channel_data(1, (self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE)))
         self._last_update_time = self.clocks.system_clock
 
         values = [val for pair in zip(self._raw_audio[0],self._raw_audio[1]) for val in pair]
@@ -37,7 +37,7 @@ class WAV_TIA_Sound(audio.tiasound.TIA_Sound):
         self._raw_audio[0] = []
         self._raw_audio[1] = []
 
-class OSS_TIA_Sound(audio.tiasound.TIA_Sound):
+class OSS_TIA_Sound(tiasound.TIA_Sound):
 
     def __init__(self, clocks):
         super(OSS_TIA_Sound, self).__init__(clocks)
@@ -54,8 +54,8 @@ class OSS_TIA_Sound(audio.tiasound.TIA_Sound):
         """ Update the 'emulated' audio wave form, based on current time.
         """
         audio_ticks = self.clocks.system_clock - self._last_update_time
-        self._raw_audio[0].extend(self.get_channel_data(0,  self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE))
-        self._raw_audio[1].extend(self.get_channel_data(1,  self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE))
+        self._raw_audio[0].extend(self.get_channel_data(0,  (self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE)))
+        self._raw_audio[1].extend(self.get_channel_data(1,  (self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE)))
         self._last_update_time = self.clocks.system_clock
 
         values = [val for pair in zip(self._raw_audio[0],self._raw_audio[1]) for val in pair]
@@ -64,7 +64,7 @@ class OSS_TIA_Sound(audio.tiasound.TIA_Sound):
         self._raw_audio[0] = []
         self._raw_audio[1] = []
 
-class OSS_StretchTIA_Sound(audio.tiasound.TIA_Sound):
+class OSS_StretchTIA_Sound(tiasound.TIA_Sound):
 
     def __init__(self, clocks):
         super(OSS_StretchTIA_Sound, self).__init__(clocks)
@@ -72,7 +72,7 @@ class OSS_StretchTIA_Sound(audio.tiasound.TIA_Sound):
         self._last_update_time = self.clocks.system_clock
 
         # Hold 'stretch' state for each channel.
-        self._stretchers = [audio.tiasound.Stretch(),audio.tiasound.Stretch()]
+        self._stretchers = [tiasound.Stretch(), tiasound.Stretch()]
         self._stretched =  [[],[]]
 
     def openSound(self):
@@ -87,7 +87,7 @@ class OSS_StretchTIA_Sound(audio.tiasound.TIA_Sound):
         audio_ticks = self.clocks.system_clock - self._last_update_time
         self._last_update_time = self.clocks.system_clock
         for channel_num in range(2):
-            raw_audio = self.get_channel_data(channel_num,  self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE)
+            raw_audio = self.get_channel_data(channel_num,  (self.SAMPLERATE*audio_ticks/self.CPU_CLOCK_RATE))
             self._stretched[channel_num] += self._stretchers[channel_num].stretch(raw_audio)
 
         values = [val for pair in zip(self._stretched[0],self._stretched[1]) for val in pair]
@@ -96,7 +96,7 @@ class OSS_StretchTIA_Sound(audio.tiasound.TIA_Sound):
         for channel_num in range(2):
             self._stretched[channel_num] = []
 
-class SamplesTIA_Sound(audio.tiasound.TIA_Sound):
+class SamplesTIA_Sound(tiasound.TIA_Sound):
 
     def __init__(self, clocks):
         super(SamplesTIA_Sound, self).__init__(clocks)

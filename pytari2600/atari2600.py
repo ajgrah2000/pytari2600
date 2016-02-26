@@ -3,7 +3,6 @@ from .memory import riot
 from .memory import cartridge
 from . import clocks
 from . import inputs
-from . import event_handler
 import json
 
 class Atari(object):
@@ -17,13 +16,6 @@ class Atari(object):
         self.core     = cpu.core.Core(self.clocks, self.memory, self.pc_state)
 
         self.core.initialise()
-
-        # Event handler/thread.
-        self.event_handler = event_handler.EventHandler(
-                                self.inputs.handle_events, 
-                                self.stella.tiasound.handle_events)
-
-        self.event_handler.start()
 
     def insert_cartridge(self, cart_name, cart_type):
         if cart_type == 'pb':

@@ -42,6 +42,11 @@ class PygameStella(stella.Stella):
         else:
             self.driver_draw_display = self._draw_using_set_at
 
+    def poll_events(self):
+        # Handle events on diplay draw
+        for event in pygame.event.get():
+          self.inputs.handle_events(event)
+          self.tiasound.handle_events(event)
 
     def driver_open_display(self):
       pygame.init()
