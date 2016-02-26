@@ -6,7 +6,6 @@ python:
     - "pypy"
 before_install:
     - "sudo apt-get install mercurial libsdl-image1.2-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libsdl1.2-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev"
-#    - "sudo apt-get install pygame"
     - "sudo apt-get build-dep pygame"
 install:
   - |
@@ -24,6 +23,6 @@ install:
       fi
   - "pip install -r requirements.txt"
 script:
-    coverage run --source=pytari2600 unit_tests.py
+    coverage run --source=pytari2600 -m pytari2600.unit_tests
 after_success:
     coveralls

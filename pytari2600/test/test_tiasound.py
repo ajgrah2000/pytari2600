@@ -1,6 +1,6 @@
 import unittest
 
-import pytari2600.audio.tiasound
+import pytari2600.audio.tiasound as tiasound
 import sys
 
 class TestTiaSound(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestTiaSound(unittest.TestCase):
             poly4_state = 0xF
             for i in range(20):
                 ref_poly4_state = self.reference_poly4(audio_ctrl, poly5_state, poly4_state)
-                poly4_state = pytari2600.audio.tiasound.TIA_Sound.poly4(audio_ctrl, poly5_state, poly4_state)
+                poly4_state = tiasound.TIA_Sound.poly4(audio_ctrl, poly5_state, poly4_state)
                 self.assertEqual(poly4_state, ref_poly4_state)
 
     def test_poly5(self):
@@ -21,7 +21,7 @@ class TestTiaSound(unittest.TestCase):
             poly5_state = j
             for i in range(40):
                 ref_poly5_state = self.reference_poly5(audio_ctrl, poly5_state, poly4_state)
-                poly5_state = pytari2600.audio.tiasound.TIA_Sound.poly5(audio_ctrl, poly5_state, poly4_state)
+                poly5_state = tiasound.TIA_Sound.poly5(audio_ctrl, poly5_state, poly4_state)
                 self.assertEqual(poly5_state, ref_poly5_state)
 
     def test_poly5_4_combo(self):
@@ -33,12 +33,12 @@ class TestTiaSound(unittest.TestCase):
 
             for i in range(260):
                 ref_poly5_state = self.reference_poly5(audio_ctrl, poly5_state, poly4_state)
-                next_poly5 = pytari2600.audio.tiasound.TIA_Sound.poly5(audio_ctrl, poly5_state, poly4_state)
+                next_poly5 = tiasound.TIA_Sound.poly5(audio_ctrl, poly5_state, poly4_state)
                 self.assertEqual(ref_poly5_state, next_poly5)
 
-                if pytari2600.audio.tiasound.TIA_Sound.poly5clk(audio_ctrl, poly5_state):
+                if tiasound.TIA_Sound.poly5clk(audio_ctrl, poly5_state):
                     ref_poly4_state = self.reference_poly4(audio_ctrl, poly5_state, poly4_state)
-                    next_poly4 = pytari2600.audio.tiasound.TIA_Sound.poly4(audio_ctrl, poly5_state, poly4_state)
+                    next_poly4 = tiasound.TIA_Sound.poly4(audio_ctrl, poly5_state, poly4_state)
                     poly4_state = next_poly4
                     self.assertEqual(ref_poly4_state, poly4_state)
 
@@ -50,15 +50,15 @@ class TestTiaSound(unittest.TestCase):
         for audio_ctrl in range(0x10):
             for poly5_state in range(0x20):
                 ref_poly5clk = self.reference_poly5clk(audio_ctrl, poly5_state)
-                p5clk = pytari2600.audio.tiasound.TIA_Sound.poly5clk(audio_ctrl, poly5_state)
+                p5clk = tiasound.TIA_Sound.poly5clk(audio_ctrl, poly5_state)
                 self.assertEqual(p5clk, ref_poly5clk)
 
                 for poly4_state in range(0x10):
                     ref_poly4_state = self.reference_poly4(audio_ctrl, poly5_state, poly4_state)
-                    p4 = pytari2600.audio.tiasound.TIA_Sound.poly4(audio_ctrl, poly5_state, poly4_state)
+                    p4 = tiasound.TIA_Sound.poly4(audio_ctrl, poly5_state, poly4_state)
 
                     ref_poly5_state = self.reference_poly5(audio_ctrl, poly5_state, poly4_state)
-                    p5 = pytari2600.audio.tiasound.TIA_Sound.poly5(audio_ctrl, poly5_state, poly4_state)
+                    p5 = tiasound.TIA_Sound.poly5(audio_ctrl, poly5_state, poly4_state)
 
                     self.assertEqual(p4, ref_poly4_state)
                     self.assertEqual(p5, ref_poly5_state)
@@ -97,7 +97,7 @@ class TestTiaSound(unittest.TestCase):
 
 class TestStretch(unittest.TestCase):
     def test_stretch(self):
-        stretch = pytari2600.audio.tiasound.Stretch()
+        stretch = tiasound.Stretch()
         a = [1,0,1,0,1,0,1,0]
         print("orig:", a)
         print(stretch.stretch(a))

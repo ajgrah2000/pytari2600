@@ -1,4 +1,4 @@
-import pytari2600.memory.memory
+import pytari2600.memory.memory as memory
 import unittest
 
 class Dummy(object):
@@ -14,7 +14,7 @@ class Dummy(object):
 class TestMemory(unittest.TestCase):
     def test_memory(self):
         dummy = Dummy()
-        m = pytari2600.memory.memory.Memory()
+        m = memory.Memory()
 
         m.set_cartridge(dummy)
         m.set_riot(dummy)
