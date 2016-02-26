@@ -67,7 +67,7 @@ def main():
                               help="Select an alternate to graphics module")
     parser.add_argument('--cpu', dest='cpu_driver', 
                               choices=cpu_options.keys(), 
-                              default='cpu',
+                              default='cpu_gen',
                               help="Select an alternate CPU emulation, primarily to allow trying different optimisations.")
     parser.add_argument('-a', dest='audio_driver', 
                               choices=audio_options.keys(), 

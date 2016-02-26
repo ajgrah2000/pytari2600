@@ -3,7 +3,7 @@ import wave
 import pygame.mixer
 import pygame.locals
 
-class PygameStretchTIA_Sound(audio.tiasound.TIA_Sound):
+class PygameStretchTIA_Sound(tiasound.TIA_Sound):
     """ Capture sound (accurately), try to stretch sound to current speed.
     """
 
@@ -24,7 +24,7 @@ class PygameStretchTIA_Sound(audio.tiasound.TIA_Sound):
         self._test_accumulated_sound  = self._sound_chunk_size * 2
 
         # Hold 'stretch' state for each channel.
-        self._stretcher = audio.tiasound.Stretch()
+        self._stretcher = tiasound.Stretch()
 
         self._stretched = [[],[]]
 
