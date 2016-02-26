@@ -1,6 +1,6 @@
-import cpu_gen.addressing as addressing
-import cpu_gen.instructions as instructions
-import cpu_gen.pc_state as pc_state
+from . import addressing
+from . import instructions
+from . import pc_state
 
 class OpDecoder(object):
     def __init__(self, pc_state, memory, instruction_lookup):

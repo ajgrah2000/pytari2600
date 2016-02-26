@@ -1,12 +1,12 @@
 import unittest
-import pytari2600.graphics.pygamestella
-import pytari2600.graphics.stella
-import pytari2600.clocks
-import pytari2600.inputs
+import pytari2600.graphics.pygamestella as pygamestella
+import pytari2600.graphics.stella as stella
+import pytari2600.clocks as clocks
+import pytari2600.inputs as inputs
 
 class TestCollisions(unittest.TestCase):
     def test_collisions(self):
-        collisions = pytari2600.graphics.stella.CollisionState()
+        collisions = stella.CollisionState()
 
         for i in range(0x40):
           p0 = i & 0x1
@@ -25,7 +25,7 @@ class TestCollisions(unittest.TestCase):
 
     def test_colors(self):
         """ Test color lookup. """
-        c = pytari2600.graphics.pygamestella.PygameColors()
+        c = pygamestella.PygameColors()
         # Check length and sample first and last color values.
         self.assertEqual(len(c.colors), 128)
         self.assertEqual(c.colors[0], 0)
@@ -35,7 +35,7 @@ class TestDrawing(unittest.TestCase):
 
     def reference_update_playfield(self, pf0, pf1, pf2, ctrlpf, x):
         drawn = False
-        if (x>=0) and (x < pytari2600.graphics.stella.Stella.FRAME_WIDTH & 0xFFFF):
+        if (x>=0) and (x < stella.Stella.FRAME_WIDTH & 0xFFFF):
             # Bit order for displaying pf1 is reverse to pf0 & pf2.
             # Order:
             # PF0: 4,5,6,7, PF1: 7,6,5,4,3,2,1,0 PF2: 0,1,2,3,4,5,6,7
@@ -72,10 +72,10 @@ class TestDrawing(unittest.TestCase):
         drawn = False
 
         if 0 != grp:
-            (number, size, gap) = pytari2600.graphics.stella.Stella.nusize(nusiz)
+            (number, size, gap) = stella.Stella.nusize(nusiz)
 
-            if resp < pytari2600.graphics.stella.Stella.HORIZONTAL_BLANK:
-                resp = pytari2600.graphics.stella.Stella.HORIZONTAL_BLANK
+            if resp < stella.Stella.HORIZONTAL_BLANK:
+                resp = stella.Stella.HORIZONTAL_BLANK
 
             for n in range(number):
                 bitfield = grp
@@ -84,7 +84,7 @@ class TestDrawing(unittest.TestCase):
                     for i in range(8):
                         # TODO: 'size/2' is a workaround for 'missile command'
                         # shifting of the explosion when size increases.
-                        pos = (resp - pytari2600.graphics.stella.Stella.HORIZONTAL_BLANK + int(size/2) + i*size + s + n * gap*8) % pytari2600.graphics.stella.Stella.FRAME_WIDTH & 0xFF
+                        pos = (resp - stella.Stella.HORIZONTAL_BLANK + int(size/2) + i*size + s + n * gap*8) % stella.Stella.FRAME_WIDTH & 0xFF
 
                         if x == pos:
                             if (refp & 0x8) == 0:
@@ -99,9 +99,9 @@ class TestDrawing(unittest.TestCase):
         return drawn
 
     def test_update_player(self):
-        test_clocks = pytari2600.clocks.Clock()
-        test_input = pytari2600.inputs.Input()
-        s = pytari2600.graphics.stella.PlayerState(test_clocks)
+        test_clocks = clocks.Clock()
+        test_input = inputs.Input()
+        s = stella.PlayerState(test_clocks)
 
         test_nusiz = range(0,8)
         test_refp   = [0,0x8]
@@ -140,9 +140,9 @@ class TestDrawing(unittest.TestCase):
                                     len(test_x))
 
     def test_update_playfield(self):
-        test_clocks = pytari2600.clocks.Clock()
-        test_input = pytari2600.inputs.Input()
-        s = pytari2600.graphics.stella.PlayfieldState()
+        test_clocks = clocks.Clock()
+        test_input = inputs.Input()
+        s = stella.PlayfieldState()
 
         test_pf0    = [0,0x10,0x20,0x40,0x80]
         test_pf1    = [0,0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80]

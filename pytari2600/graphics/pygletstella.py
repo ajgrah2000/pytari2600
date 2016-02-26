@@ -1,6 +1,6 @@
 import pyglet
 from pyglet.gl import *
-import stella
+from . import stella
 
 window = pyglet.window.Window(visible=False, resizable=True)
 

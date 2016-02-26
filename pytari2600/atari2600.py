@@ -1,9 +1,9 @@
-import memory.memory
-import memory.riot
-import memory.cartridge
-import clocks
-import inputs
-import event_handler
+from .memory import memory
+from .memory import riot
+from .memory import cartridge
+from . import clocks
+from . import inputs
+from . import event_handler
 import json
 
 class Atari(object):
@@ -11,8 +11,8 @@ class Atari(object):
         self.clocks   = clocks.Clock()
         self.pc_state = cpu.pc_state.PC_State()
         self.inputs   = inputs.Input()
-        self.memory   = memory.memory.Memory()
-        self.riot     = memory.riot.Riot(self.clocks, self.inputs)
+        self.memory   = memory.Memory()
+        self.riot     = riot.Riot(self.clocks, self.inputs)
         self.stella   = Graphics(self.clocks,  self.inputs, audio)
         self.core     = cpu.core.Core(self.clocks, self.memory, self.pc_state)
 
@@ -27,27 +27,27 @@ class Atari(object):
 
     def insert_cartridge(self, cart_name, cart_type):
         if cart_type == 'pb':
-            new_cart = memory.cartridge.PBCartridge(cart_name)
+            new_cart = cartridge.PBCartridge(cart_name)
         elif cart_type == 'mnet':
-            new_cart = memory.cartridge.MNetworkCartridge(cart_name)
+            new_cart = cartridge.MNetworkCartridge(cart_name)
         elif cart_type == 'fe':
-            new_cart = memory.cartridge.GenericCartridge(cart_name, 8, 0x1000, 0xFFB, 0x080)
+            new_cart = cartridge.GenericCartridge(cart_name, 8, 0x1000, 0xFFB, 0x080)
         elif cart_type == 'e':
             # Robotank, Decathelon
-            new_cart = memory.cartridge.FECartridge(cart_name, 2, 0x1000)
+            new_cart = cartridge.FECartridge(cart_name, 2, 0x1000)
         elif cart_type == 'cbs':
-            new_cart = memory.cartridge.GenericCartridge(cart_name, 3, 0x1000, 0xFFA, 0x100)
+            new_cart = cartridge.GenericCartridge(cart_name, 3, 0x1000, 0xFFA, 0x100)
         elif cart_type == 'super':
-            new_cart = memory.cartridge.GenericCartridge(cart_name, 4, 0x1000, 0xFF9, 0x080)
+            new_cart = cartridge.GenericCartridge(cart_name, 4, 0x1000, 0xFF9, 0x080)
         elif cart_type == 'f4':
-            new_cart = memory.cartridge.GenericCartridge(cart_name, 8, 0x1000, 0xFFB, 0x000)
+            new_cart = cartridge.GenericCartridge(cart_name, 8, 0x1000, 0xFFB, 0x000)
         elif cart_type == 'single_bank':
-            new_cart = memory.cartridge.SingleBankCartridge(cart_name, 0x1000)
+            new_cart = cartridge.SingleBankCartridge(cart_name, 0x1000)
         elif cart_type == 'default':
-            new_cart = memory.cartridge.GenericCartridge(cart_name, 8, 0x1000, 0xFF9, 0x0)
+            new_cart = cartridge.GenericCartridge(cart_name, 8, 0x1000, 0xFF9, 0x0)
         else:
             # Same as 'default'
-            new_cart = memory.cartridge.GenericCartridge(cart_name, 4, 0x1000, 0xFF9, 0x0)
+            new_cart = cartridge.GenericCartridge(cart_name, 4, 0x1000, 0xFF9, 0x0)
         self.memory.set_cartridge(new_cart)
 
 

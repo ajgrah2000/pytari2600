@@ -3,7 +3,7 @@
 """
 
 import argparse
-import atari2600
+from . import atari2600
 
 # Possible audio drivers
 audio_options = {
@@ -22,7 +22,7 @@ graphics_options = {
 
 # Possible graphics drivers
 cpu_options = {
-    'cpu_gen': 'import pytari2600.cpu_gen as cpu',
+    'cpu_gen': 'from pytari2600 import cpu_gen as cpu',
     'cpu': 'import pytari2600.cpu as cpu'
     }
 
