@@ -1,1 +1,3 @@
-hg+http://bitbucket.org/pygame/pygame
+hg+http://bitbucket.org/pygame/pygame; platform_python_implementation != 'PyPy'
+pygame_cffi; platform_python_implementation == 'PyPy'
+coveralls

@@ -3,7 +3,7 @@ python based atari 2600 emulator
 
 Python atari2600 emulator
 =========================
-|license| |build|
+|license| |build| |coverage|
 
 Atari2600 emulator written in Python.
 
@@ -90,3 +90,7 @@ TODO:
 .. |build| image:: https://travis-ci.org/ajgrah2000/pytari2600.svg?branch=master
    :target: https://travis-ci.org/ajgrah2000/pytari2600
    :alt: Continuous Integration
+
+.. |coverage| image:: https://coveralls.io/repos/github/ajgrah2000/pytari2600/badge.svg?branch=master
+   :target: https://coveralls.io/github/ajgrah2000/pytari2600?branch=master
+   :alt: Coverage
