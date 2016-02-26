@@ -80,6 +80,7 @@ class TIA_Sound(object):
     def get_channel_data(self, channel, length):
         # Stereo callback encodes left and right by using even/odd entries in the
         # stream.
+        length = int(length)
         stream = [0] * length
         for i in range(length):
     

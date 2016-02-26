@@ -50,7 +50,7 @@ class PygameStretchTIA_Sound(audio.tiasound.TIA_Sound):
 
             if self._maintain_pitch:
                 # Generate the 'raw' channel output
-                raw_audio = self.get_channel_data(channel_num, int(self._stretcher.divisor*self.SAMPLERATE*audio_ticks/(self.CPU_CLOCK_RATE*self._stretcher.rate)))
+                raw_audio = self.get_channel_data(channel_num, (self._stretcher.divisor*self.SAMPLERATE*audio_ticks/(self.CPU_CLOCK_RATE*self._stretcher.rate)))
                 self._stretched[channel_num] += raw_audio
             else:
                 # Generate the 'raw' channel output

@@ -30,19 +30,27 @@ class Input(object):
         self.paddle0 = state['paddle0'] 
         self.quit    = state['quit']    
 
+    def refresh_inputs(self):
+        pass
+
     def get_swcha(self):
+        self.refresh_inputs()
         return self.swcha
 
     def get_swchb(self):
+        self.refresh_inputs()
         return self.swchb
 
     def get_input7(self):
+        self.refresh_inputs()
         return self.input7
 
     def get_paddle0(self):
+        self.refresh_inputs()
         return self.paddle0
 
     def get_quit(self):
+        self.refresh_inputs()
         return self.quit
 
     # Custom key events

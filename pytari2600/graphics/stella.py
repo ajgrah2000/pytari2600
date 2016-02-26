@@ -993,6 +993,7 @@ class Stella(object):
             self.driver_update_display()
 
     def _draw_display(self):
+        self.poll_events()
         self.driver_draw_display()
 
     def _hmove(self):
