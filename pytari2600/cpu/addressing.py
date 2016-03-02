@@ -108,10 +108,17 @@ class AddressAby(Addressing):
 
 class AddressAbx(Addressing):
     def __init__(self, pc_state, memory):
-        super(AddressAbx, self).__init__(pc_state, memory, 2, 2)
+        super(AddressAbx, self).__init__(pc_state, memory, 2, 2, 1)
+
     def address(self, check_page_delay):
         """Abx"""
-        return self.memory.read16(self.pc_state.PC + 1) + self.pc_state.X.get_value() & 0xFFFF
+        address_tmp = self.memory.read16(self.pc_state.PC + 1)
+        tmp16 = address_tmp + self.pc_state.X.get_value() & 0xFFFF
+
+        if (check_page_delay):
+            self._last_page_delay = self.has_page_clock_delay(address_tmp, tmp16)
+
+        return tmp16
 
 class AddressAccumulator(Addressing):
     def __init__(self, pc_state, memory):
