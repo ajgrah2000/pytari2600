@@ -521,7 +521,7 @@ class Stella(object):
 
     HORIZONTAL_BLANK  = 68
     FRAME_WIDTH       = 160
-    FRAME_HEIGHT      = 242
+    FRAME_HEIGHT      = 280
     PIXEL_HEIGHT      = 2
     PIXEL_WIDTH       = 4
 
@@ -583,6 +583,7 @@ class Stella(object):
         self._inpt = [0, 0, 0, 0, 0, 0] 
 
         self._debug_display_time = 0
+        self._vsync_debug_output_clock = 0
 
         # Initialse write lookup
         self._populate_write_lookup()
@@ -1013,10 +1014,8 @@ class Stella(object):
         # hm - int8
         # Need to ensure 'hm' maintains negative when shifted.
         clock_shift = 0
-        if hm & 0x80:
-            clock_shift = ctypes.c_byte(hm).value >> 4
-        else:
-            clock_shift = ctypes.c_byte(hm).value >> 4
+        # 'hm >= 0x80' is negative move.
+        clock_shift = ctypes.c_byte(hm).value >> 4
         return clock_shift
 
     def _write_vsync(self, data):
