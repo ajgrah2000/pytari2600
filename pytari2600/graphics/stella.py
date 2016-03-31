@@ -2,6 +2,35 @@ import ctypes
 import time
 import pkg_resources
 
+
+# Hacky decorator, to allow 'replay' of gui only
+def stella_record_decorator(func):
+    """ Debug decorator for stella """
+    def func_wrapper(self, data):
+        print "dummy_clock.system_clock = %s"%(self.clocks.system_clock)
+        print "stella_instance.%s(%s)"%( func.__name__, data)
+        func(self, data)
+    return func_wrapper
+
+def stella_replay_decorator(func):
+    """ Debug decorator for stella """
+    # replay
+    def func_wrapper(self, data):
+        self._update_scans()
+        if False == self._is_blank:
+            self._screen_scan(self.nextLine, self._display_lines)
+        func(self, data)
+    return func_wrapper
+
+def stella_null_decorator(func):
+    return func
+
+# Select the decorator function to use
+#stella_debug_decorator = stella_record_decorator
+#stella_debug_decorator = stella_replay_decorator
+stella_debug_decorator = stella_null_decorator
+
+
 class PlayfieldState(object):
     """  Playfield state.
          It's updated infrequently, so generate an entire scan each update and
@@ -746,109 +775,142 @@ class Stella(object):
         self._write_function[0x27] = self._STELLA_Write_Vdelbl
         self._write_function[0x2C] = self._STELLA_Write_Cxclr
 
+    @stella_debug_decorator
     def _STELLA_Write_Vsync(self, data):
             self._write_vsync(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Vblank(self, data):
             self._write_vblank(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Wsync(self, data):
             self._write_wsync(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Rsync(self, data):
             self._write_rsync(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Nusiz0(self, data):
             self.p0_state.update_nusiz(data)
             self.missile0.update_nusiz(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Nusiz1(self, data):
             self.p1_state.update_nusiz(data)
             self.missile1.update_nusiz(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Colump0(self, data):
             self.nextLine.pColor[0] = self._colors.get_color(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Colump1(self, data):
             self.nextLine.pColor[1] = self._colors.get_color(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Colupf(self, data):
             self.nextLine.playfieldColor = self._colors.get_color(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Colubk(self, data):
             self.nextLine.backgroundColor = self._colors.get_color(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Ctrlpf(self, data):
             self.nextLine.ctrlpf        = data
             self.playfield_state.update_ctrlpf(data)
             self.ball.update_ctrlpf(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Refp0(self, data):
             self.p0_state.update_refp(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Refp1(self, data):
             self.p1_state.update_refp(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Pf0(self, data):
             self.playfield_state.update_pf0(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Pf1(self, data):
             self.playfield_state.update_pf1(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Pf2(self, data):
             self.playfield_state.update_pf2(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Resp0(self, data):
             self.p0_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
 
+    @stella_debug_decorator
     def _STELLA_Write_Resp1(self, data):
             self.p1_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
 
+    @stella_debug_decorator
     def _STELLA_Write_Resm0(self, data):
             self.missile0.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
 
+    @stella_debug_decorator
     def _STELLA_Write_Resm1(self, data):
             self.missile1.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
 
+    @stella_debug_decorator
     def _STELLA_Write_Resbl(self, data):
             self.ball.update_resbl((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
 
+    @stella_debug_decorator
     def _STELLA_Write_Grp0(self, data):
             self.p0_state.update_p(data)
             self.p1_state.update_pOld(self.p1_state.p)
 
+    @stella_debug_decorator
     def _STELLA_Write_Grp1(self, data):
             self.p1_state.update_p(data)
             self.p0_state.update_pOld(self.p0_state.p)
             self.ball.update_enableOld(self.ball.enabl)
 
+    @stella_debug_decorator
     def _STELLA_Write_Enam0(self, data):
             self.missile0.update_enam(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Enam1(self, data):
             self.missile1.update_enam(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Enabl(self, data):
             self.ball.update_enabl(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Hmp0(self, data):
             self.nextLine.hmp[0] = data
 
+    @stella_debug_decorator
     def _STELLA_Write_Hmp1(self, data):
             self.nextLine.hmp[1] = data
 
+    @stella_debug_decorator
     def _STELLA_Write_Hmm0(self, data):
             self.nextLine.hmm[0] = data
 
+    @stella_debug_decorator
     def _STELLA_Write_Hmm1(self, data):
             self.nextLine.hmm[1] = data
 
+    @stella_debug_decorator
     def _STELLA_Write_Hmbl(self, data):
             self.nextLine.hmbl = data
 
+    @stella_debug_decorator
     def _STELLA_Write_Hmove(self, data):
             self._hmove()
 
+    @stella_debug_decorator
     def _STELLA_Write_Hclr(self, data):
             self.nextLine.hmp[0] = 0 
             self.nextLine.hmp[1] = 0 
@@ -856,15 +918,19 @@ class Stella(object):
             self.nextLine.hmm[1] = 0 
             self.nextLine.hmbl   = 0
 
+    @stella_debug_decorator
     def _STELLA_Write_Vdelp0(self, data):
             self.p0_state.update_vdelp(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Vdelp1(self, data):
             self.p1_state.update_vdelp(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Vdelbl(self, data):
             self.ball.update_vdelbl(data)
 
+    @stella_debug_decorator
     def _STELLA_Write_Cxclr(self, data):
             self._collision_state.clear()
 
