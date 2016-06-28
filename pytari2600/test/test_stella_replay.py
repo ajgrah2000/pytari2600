@@ -27,22 +27,22 @@ class DummyAudio(object):
     def step(self):
         pass
 
-    def write_audio_ctrl_0(self):
+    def write_audio_ctrl_0(self, dummy):
         pass
 
-    def write_audio_ctrl_1(self):
+    def write_audio_ctrl_1(self, dummy):
         pass
 
-    def write_audio_freq_0(self):
+    def write_audio_freq_0(self, dummy):
         pass
 
-    def write_audio_freq_1(self):
+    def write_audio_freq_1(self, dummy):
         pass
 
-    def write_audio_vol_0(self):
+    def write_audio_vol_0(self, dummy):
         pass
 
-    def write_audio_vol_1(self):
+    def write_audio_vol_1(self, dummy):
         pass
 
 class DummyInputs(object):
@@ -56,6 +56,9 @@ class DummyInputs(object):
         pass
 
     def handle_events(self, dummy):
+        pass
+
+    def get_input7(self):
         pass
 
     def step(self):
