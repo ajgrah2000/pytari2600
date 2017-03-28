@@ -517,7 +517,7 @@ class Colors(object):
         c = color >> 1
         return self.colors[c]
 
-class StellaBase(object):
+class Stella(object):
 
     HORIZONTAL_BLANK  = 68
     FRAME_WIDTH       = 160
@@ -1053,32 +1053,31 @@ class StellaBase(object):
         if (self.clocks.system_clock - self._screen_start_clock) > 3:
           self.clocks.system_clock += Stella.HORIZONTAL_TICKS - (self.clocks.system_clock - self._screen_start_clock + FUDGE) % Stella.HORIZONTAL_TICKS 
 
-
-class StellaRecord(StellaBase):
+class StellaInstrumentRecord(object):
     """ Record read/write calls, to allow replay/debugging.
         Generated script can be run to replay.
     """
 
-    def __init__(self, clocks, inputs, AudioDriver):
+    @staticmethod
+    def instrumentStella(stella_instance, file_name):
         import StringIO
-        output = open('blah_record.py', 'w')
+        output = open(file_name, 'w')
 
-        output.write(self.stella_record_header())
-
-        super(StellaRecord, self).__init__(clocks, inputs, AudioDriver)
+        output.write(StellaInstrumentRecord.stella_record_header())
 
         def _decorator(func):
           """ Debug decorator for stella """
           def func_wrapper(*data):
-              output.write("dummy_clock.system_clock = %s\n"%(self.clocks.system_clock))
+              output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
               output.write("stella_instance.%s%s\n"%( func.__name__, data))
               return func(*data)
           return func_wrapper
 
-        self.read  = _decorator(self.read )
-        self.write = _decorator(self.write)
+        stella_instance.read  = _decorator(stella_instance.read )
+        stella_instance.write = _decorator(stella_instance.write)
 
-    def stella_record_header(self):
+    @staticmethod
+    def stella_record_header():
         return """
 import time
 from pytari2600.test.test_stella_replay import DummyClocks as DummyClocks
@@ -1091,5 +1090,3 @@ dummy_inputs = DummyInputs()
 stella_instance = stella(dummy_clock, dummy_inputs, DummyAudio)
 """
 
-#Stella = StellaBase
-Stella = StellaRecord

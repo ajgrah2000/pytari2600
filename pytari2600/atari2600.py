@@ -1,6 +1,7 @@
 from .memory import memory
 from .memory import riot
 from .memory import cartridge
+from .graphics import stella
 from . import clocks
 from . import inputs
 import json
@@ -73,7 +74,12 @@ class Atari(object):
         # riot
         self.riot.set_save_state(  state['riot'])
 
-    def power_on(self, stop_clock, no_delay=False, debug=False, replay_file=False):
+    def power_on(self, stop_clock, no_delay=False, debug=False, replay_file=False, stella_record_file=None):
+
+        # Allow recording of 'stella' interface.
+        if stella_record_file:
+            stella.StellaInstrumentRecord.instrumentStella(self.stella, stella_record_file)
+
         self.memory.set_riot(self.riot)
         self.memory.set_stella(self.stella)
 

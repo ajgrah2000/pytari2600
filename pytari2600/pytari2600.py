@@ -40,13 +40,12 @@ def config(graphics_selection, audio_selection, cpu_selection):
             exec_locals['cpu'])
 
 def run(args):
-    (graphics, audio, cpu) = config(args.graphics_driver, args.audio_driver, args.cpu_driver)
+    (video, audio, cpu) = config(args.graphics_driver, args.audio_driver, args.cpu_driver)
 
-    atari = atari2600.Atari(graphics, audio, cpu)
+    atari = atari2600.Atari(video, audio, cpu)
     atari.insert_cartridge(args.cartridge_name, args.cart_type)
 
-
-    atari.power_on(args.stop_clock, args.no_delay, args.debug, args.replay_file)
+    atari.power_on(args.stop_clock, args.no_delay, args.debug, args.replay_file, args.stella_record_file)
 
 def main():
     parser = argparse.ArgumentParser(description='ATARI emulator')
@@ -54,6 +53,8 @@ def main():
     parser.add_argument('-d', dest='debug',          action='store_true')
     parser.add_argument('-r', '--replay_file', dest='replay_file', type=str,
                               help="Json file to save/restore state. Triggered via '[',']' keys")
+    parser.add_argument('--stella_record_file', dest='stella_record_file', type=str,
+                              help="Stella record/replay output script file. Generates a python script that can replay stella read/writes.")
     parser.add_argument('-s', dest='stop_clock',     type=int, default=0,
                               help="Set a clock time to stop (useful for profiling), setting to '0' is disable stop")
     parser.add_argument('-c', dest='cart_type', 
