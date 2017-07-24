@@ -1069,12 +1069,27 @@ class StellaInstrumentRecord(object):
           """ Debug decorator for stella """
           def func_wrapper(*data):
               output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
-              output.write("stella_instance.%s%s\n"%( func.__name__, data))
+              output.write("stella_instance.%s%s\n"%(func.__name__, data))
+              return func(*data)
+          return func_wrapper
+
+        def _write_decorator(func):
+          """ Debug decorator specifically for stella write functions"""
+          def func_wrapper(*data):
+              comment_string = "%s (%s)"%(
+                      stella_instance._write_function[data[0] & 0x3F].__name__, 
+                      stella_instance._write_function[data[0] & 0x3F].__module__)
+              if ((data[0] & 0x3F) != data[0]):
+                comment_string  += " [address = %s]"%(data[0] & 0x3F)
+
+              output.write("# %s\n"%(comment_string))
+              output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
+              output.write("stella_instance.%s%s\n"%(func.__name__, data))
               return func(*data)
           return func_wrapper
 
         stella_instance.read  = _decorator(stella_instance.read )
-        stella_instance.write = _decorator(stella_instance.write)
+        stella_instance.write = _write_decorator(stella_instance.write)
 
     @staticmethod
     def stella_record_header():
