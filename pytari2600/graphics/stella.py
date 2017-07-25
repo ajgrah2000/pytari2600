@@ -1082,6 +1082,7 @@ class StellaInstrumentRecord(object):
               if ((data[0] & 0x3F) != data[0]):
                 comment_string  += " [address = %s]"%(data[0] & 0x3F)
 
+              output.write("#%s\n"%(str(stella_instance.get_save_state())))
               output.write("# %s\n"%(comment_string))
               output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
               output.write("stella_instance.%s%s\n"%(func.__name__, data))
