@@ -250,7 +250,7 @@ class PlayerState(object):
         self.p      = 0
         self.pOld   = 0
         self.refp   = 0
-        self.resp   = 0
+        self.resp   = 0 # Only loops outside of 'Stella.HORIZONTAL_BLANK'
         self.vdelp  = 0
         self.clocks = clocks
 
@@ -371,14 +371,12 @@ class PlayerState(object):
             self._size   = size
             self._gap    = gap
 
-            if self.resp < Stella.HORIZONTAL_BLANK:
-                self.resp = Stella.HORIZONTAL_BLANK
             if (self.refp & 0x8) == 0:
                 self._reflect = 1
             else:
                 self._reflect = 0
 
-            self._pos_start = (self.resp - Stella.HORIZONTAL_BLANK + int(self._size/2))
+            self._pos_start = (self.resp + int(self._size/2))
             self._calc_player_scan()
 
     def _calc_player_scan(self):
@@ -799,10 +797,18 @@ class Stella(object):
             self.playfield_state.update_pf2(data)
 
     def _STELLA_Write_Resp0(self, data):
-            self.p0_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
+#            self.p0_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.FRAME_WIDTH)
+            if (((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < Stella.HORIZONTAL_BLANK):
+              self.p0_state.update_resp(5)
+            else:
+              self.p0_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resp1(self, data):
-            self.p1_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
+#            self.p1_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
+            if (((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < Stella.HORIZONTAL_BLANK):
+              self.p1_state.update_resp(5)
+            else:
+              self.p1_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resm0(self, data):
             self.missile0.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
@@ -998,8 +1004,13 @@ class Stella(object):
         self.driver_draw_display()
 
     def _hmove(self):
-        self.p0_state.resp  = (self.p0_state.resp - self._hmove_clocks(self.nextLine.hmp[0])) % Stella.HORIZONTAL_TICKS
-        self.p1_state.resp  = (self.p1_state.resp - self._hmove_clocks(self.nextLine.hmp[1])) % Stella.HORIZONTAL_TICKS
+        # Ensure that the hmove occurs before the scan line starts.
+        if (((self.clocks.system_clock - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < (Stella.HORIZONTAL_BLANK - (15 - self._hmove_clocks(self.nextLine.hmp[0])))):
+          self.p0_state.resp  = (self.p0_state.resp - self._hmove_clocks(self.nextLine.hmp[0])) % Stella.FRAME_WIDTH
+
+        if (((self.clocks.system_clock - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < (Stella.HORIZONTAL_BLANK - (15 - self._hmove_clocks(self.nextLine.hmp[1])))):
+          self.p1_state.resp  = (self.p1_state.resp - self._hmove_clocks(self.nextLine.hmp[1])) % Stella.FRAME_WIDTH
+
         self.missile0.resm  = (self.missile0.resm - self._hmove_clocks(self.nextLine.hmm[0])) % Stella.HORIZONTAL_TICKS
         self.missile1.resm  = (self.missile1.resm - self._hmove_clocks(self.nextLine.hmm[1])) % Stella.HORIZONTAL_TICKS
         self.ball.resbl     = (self.ball.resbl - self._hmove_clocks(self.nextLine.hmbl)) % Stella.HORIZONTAL_TICKS
