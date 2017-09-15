@@ -452,7 +452,6 @@ class CollisionState(object):
         self._cxppmm = 0
 
     def update_collisions(self, p0, p1, m0, m1, bl, pf):
-
         if m0:
             if p1:
                 self._cxmp[0]  |= 0x80 # m0 & p1
@@ -548,6 +547,7 @@ class Stella(object):
     BLANK_OFF  = 0x0
 
     PF_PRIORITY = 0x4
+    PF_SCORE    = 0x2
 
     def __init__(self, clocks, inputs, AudioDriver):
         self.clocks = clocks
@@ -682,6 +682,10 @@ class Stella(object):
             print("Unknown stella read")
             result = 0
 
+        # TODO: Check values, 'noice_liquidcandy.bin' appears to require
+        # cxmp[0] to return 0x20 for correct font, guessing that '| address' is
+        # related.  I don't know what D0-D5 should read for collisions
+        result = result | address
         return result
 
     def write(self, address, data):
@@ -915,6 +919,11 @@ class Stella(object):
           current_y_line = display_lines[y]
           for x in range(x_start, x_stop):
     
+            # TODO: Check the 'score' color application.
+            #  pf color set to either 'p0' or 'p1' depending on which half of
+            #  the screen is being draw.
+            # ie: if (0 == next_line.ctrlpf & self.PF_SCORE):
+
             pf = pf_scan[x]
             bl = bl_scan[x]
             m1 = m1_scan[x]
@@ -1002,10 +1011,9 @@ class Stella(object):
         self.driver_draw_display()
 
     def _hmove(self):
-        if (((self.clocks.system_clock - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < (Stella.HORIZONTAL_BLANK - (15 - self._hmove_clocks(self.nextLine.hmp[0])))):
-          self.p0_state.resp  = (self.p0_state.resp - self._hmove_clocks(self.nextLine.hmp[0])) % Stella.FRAME_WIDTH
-        if (((self.clocks.system_clock - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < (Stella.HORIZONTAL_BLANK - (15 - self._hmove_clocks(self.nextLine.hmp[1])))):
-          self.p1_state.resp  = (self.p1_state.resp - self._hmove_clocks(self.nextLine.hmp[1])) % Stella.FRAME_WIDTH
+
+        self.p0_state.resp  = (self.p0_state.resp - self._hmove_clocks(self.nextLine.hmp[0])) % Stella.FRAME_WIDTH
+        self.p1_state.resp  = (self.p1_state.resp - self._hmove_clocks(self.nextLine.hmp[1])) % Stella.FRAME_WIDTH
 
         self.missile0.resm  = (self.missile0.resm - self._hmove_clocks(self.nextLine.hmm[0])) % Stella.HORIZONTAL_TICKS
         self.missile1.resm  = (self.missile1.resm - self._hmove_clocks(self.nextLine.hmm[1])) % Stella.HORIZONTAL_TICKS
@@ -1023,6 +1031,11 @@ class Stella(object):
         clock_shift = 0
         # 'hm >= 0x80' is negative move.
         clock_shift = ctypes.c_byte(hm).value >> 4
+        
+        # If hmove is on the '74th' CPU cycle of the scan line, special case.
+        if ((((self.clocks.system_clock - self._screen_start_clock) % Stella.HORIZONTAL_TICKS))/3 == 73):
+          clock_shift = clock_shift + 8
+
         return clock_shift
 
     def _write_vsync(self, data):
