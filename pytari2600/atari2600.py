@@ -97,6 +97,7 @@ class Atari(object):
                 with open('debug.json', 'w') as fp:
                     clk = self.clocks
                     while clk.system_clock < stop_clock:
+
                         print("clock:%s, %s"%((self.clocks.system_clock - self.stella._vsync_debug_output_clock)/3, str(self.core.pc_state)))
                         step_func()
                         state = self.get_save_state()

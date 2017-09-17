@@ -82,6 +82,7 @@ class Core(object):
         self.populate_instruction_map()
 
     def step(self):
+        # TODO: Fix 'op_decoder' to work with instructions run from ram.
         self.op_decoder[self.memory.cartridge.get_absolute_address(self.pc_state.PC)].execute()
 
     def populate_instruction_map(self):

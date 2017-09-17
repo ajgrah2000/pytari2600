@@ -677,7 +677,8 @@ class Stella(object):
         elif 0xC == masked_address:
             result = self.inputs.get_input7()
         elif 0xD == masked_address:
-            result = self._inpt[5]
+            # Guessing at '0x80'
+            result = self._inpt[5] | 0x80
         else:
             print("Unknown stella read")
             result = 0
