@@ -209,9 +209,6 @@ class MissileState(object):
         self._number = number
         self._gap    = gap
 
-        if self.resm < Stella.HORIZONTAL_BLANK:
-            self.resm = Stella.HORIZONTAL_BLANK
-
         self._calc_missile_scan()
 
     def update_nusiz(self, data):
@@ -238,7 +235,7 @@ class MissileState(object):
                 width = 1 << ((self.nusiz & 0x30) >> 4)
                 # Uses similar position to 'player'
                 for i in range(width):
-                    x = (i +self.resm + n*self._gap*8 - Stella.HORIZONTAL_BLANK) % Stella.FRAME_WIDTH 
+                    x = (i +self.resm + n*self._gap*8) % Stella.FRAME_WIDTH 
                     self._scan_line[x] = True
 
     def get_missile_scan(self):
@@ -814,10 +811,16 @@ class Stella(object):
                 self.p1_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resm0(self, data):
-            self.missile0.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
+            if (((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < Stella.HORIZONTAL_BLANK):
+                self.missile0.update_resm(3)
+            else:
+                self.missile0.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resm1(self, data):
-            self.missile1.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
+            if (((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < Stella.HORIZONTAL_BLANK):
+                self.missile1.update_resm(3)
+            else:
+                self.missile1.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resbl(self, data):
             self.ball.update_resbl((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
@@ -915,7 +918,7 @@ class Stella(object):
           if y == y_stop:
             x_stop = last_x_stop
           else:
-            x_stop = self.FRAME_WIDTH - 1
+            x_stop = self.FRAME_WIDTH
     
           current_y_line = display_lines[y]
           for x in range(x_start, x_stop):
@@ -1016,8 +1019,8 @@ class Stella(object):
         self.p0_state.resp  = (self.p0_state.resp - self._hmove_clocks(self.nextLine.hmp[0])) % Stella.FRAME_WIDTH
         self.p1_state.resp  = (self.p1_state.resp - self._hmove_clocks(self.nextLine.hmp[1])) % Stella.FRAME_WIDTH
 
-        self.missile0.resm  = (self.missile0.resm - self._hmove_clocks(self.nextLine.hmm[0])) % Stella.HORIZONTAL_TICKS
-        self.missile1.resm  = (self.missile1.resm - self._hmove_clocks(self.nextLine.hmm[1])) % Stella.HORIZONTAL_TICKS
+        self.missile0.resm  = (self.missile0.resm - self._hmove_clocks(self.nextLine.hmm[0])) % Stella.FRAME_WIDTH
+        self.missile1.resm  = (self.missile1.resm - self._hmove_clocks(self.nextLine.hmm[1])) % Stella.FRAME_WIDTH
         self.ball.resbl     = (self.ball.resbl - self._hmove_clocks(self.nextLine.hmbl)) % Stella.HORIZONTAL_TICKS
 
         self.p0_state.update()
@@ -1105,6 +1108,7 @@ class StellaInstrumentRecord(object):
 
               output.write("#%s\n"%(str(stella_instance.get_save_state())))
               output.write("# %s\n"%(comment_string))
+              output.write("# scan cycle = %s\n"%((stella_instance.clocks.system_clock - stella_instance._screen_start_clock) % Stella.HORIZONTAL_TICKS))
               output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
               output.write("stella_instance.%s%s\n"%(func.__name__, data))
               return func(*data)
@@ -1116,6 +1120,11 @@ class StellaInstrumentRecord(object):
     @staticmethod
     def stella_record_header():
         return """
+# Debugging tip: To render 'partial' displays/check progress add
+#
+# stella_instance.driver_update_display() # Draw what's available.
+# time.sleep(5)
+#
 import time
 from pytari2600.test.test_stella_replay import DummyClocks as DummyClocks
 from pytari2600.test.test_stella_replay import DummyAudio as DummyAudio
