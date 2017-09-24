@@ -1083,7 +1083,7 @@ class StellaInstrumentRecord(object):
     """
 
     @staticmethod
-    def instrumentStella(stella_instance, file_name):
+    def instrumentStella(stella_instance, file_name, audio_only):
         import StringIO
         output = open(file_name, 'w')
 
@@ -1092,8 +1092,10 @@ class StellaInstrumentRecord(object):
         def _decorator(func):
           """ Debug decorator for stella """
           def func_wrapper(*data):
-              output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
-              output.write("stella_instance.%s%s\n"%(func.__name__, data))
+              if (audio_only == False):
+                output.write("# %s (%s)\n"%(func.__name__, func.__module__))
+                output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
+                output.write("stella_instance.%s%s\n"%(func.__name__, data))
               return func(*data)
           return func_wrapper
 
@@ -1106,11 +1108,11 @@ class StellaInstrumentRecord(object):
               if ((data[0] & 0x3F) != data[0]):
                 comment_string  += " [address = %s]"%(data[0] & 0x3F)
 
-              output.write("#%s\n"%(str(stella_instance.get_save_state())))
-              output.write("# %s\n"%(comment_string))
-              output.write("# scan cycle = %s\n"%((stella_instance.clocks.system_clock - stella_instance._screen_start_clock) % Stella.HORIZONTAL_TICKS))
-              output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
-              output.write("stella_instance.%s%s\n"%(func.__name__, data))
+              if ((audio_only == False) or (("audio" in comment_string) or ("Vsync" in comment_string))):
+#                output.write("#%s\n"%(str(stella_instance.get_save_state())))
+                output.write("# %s\n"%(comment_string))
+                output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
+                output.write("stella_instance.%s%s\n"%(func.__name__, data))
               return func(*data)
           return func_wrapper
 
@@ -1127,7 +1129,8 @@ class StellaInstrumentRecord(object):
 #
 import time
 from pytari2600.test.test_stella_replay import DummyClocks as DummyClocks
-from pytari2600.test.test_stella_replay import DummyAudio as DummyAudio
+#from pytari2600.test.test_stella_replay import DummyAudio as DummyAudio
+from pytari2600.audio.pygameaudio import PygameStretchTIA_Sound as DummyAudio
 from pytari2600.test.test_stella_replay import DummyInputs as DummyInputs
 from pytari2600.graphics.pygamestella import PygameStella as stella
 

@@ -45,7 +45,7 @@ def run(args):
     atari = atari2600.Atari(video, audio, cpu)
     atari.insert_cartridge(args.cartridge_name, args.cart_type)
 
-    atari.power_on(args.stop_clock, args.no_delay, args.debug, args.replay_file, args.stella_record_file)
+    atari.power_on(args.stop_clock, args.no_delay, args.debug, args.replay_file, args.stella_record_file, args.record_audio_only)
 
 def main():
     parser = argparse.ArgumentParser(description='ATARI emulator')
@@ -55,6 +55,8 @@ def main():
                               help="Json file to save/restore state. Triggered via '[',']' keys")
     parser.add_argument('--stella_record_file', dest='stella_record_file', type=str,
                               help="Stella record/replay output script file. Generates a python script that can replay stella read/writes.")
+    parser.add_argument('--record_audio_only', dest='record_audio_only',          action='store_true',
+            help="To be used in conjuction with '--stella_record_file', records only the audio writes, allows audio only playback from tia.")
     parser.add_argument('-s', dest='stop_clock',     type=int, default=0,
                               help="Set a clock time to stop (useful for profiling), setting to '0' is disable stop")
     parser.add_argument('-c', dest='cart_type', 

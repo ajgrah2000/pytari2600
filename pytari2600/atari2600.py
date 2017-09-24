@@ -74,11 +74,11 @@ class Atari(object):
         # riot
         self.riot.set_save_state(  state['riot'])
 
-    def power_on(self, stop_clock, no_delay=False, debug=False, replay_file=False, stella_record_file=None):
+    def power_on(self, stop_clock, no_delay=False, debug=False, replay_file=False, stella_record_file=None, audio_record_only=False):
 
         # Allow recording of 'stella' interface.
         if stella_record_file:
-            stella.StellaInstrumentRecord.instrumentStella(self.stella, stella_record_file)
+            stella.StellaInstrumentRecord.instrumentStella(self.stella, stella_record_file, audio_record_only)
 
         self.memory.set_riot(self.riot)
         self.memory.set_stella(self.stella)
@@ -98,7 +98,7 @@ class Atari(object):
                     clk = self.clocks
                     while clk.system_clock < stop_clock:
 
-                        print("%s clock:%s, %s"%(self.clocks.system_clock, (self.clocks.system_clock - self.stella._vsync_debug_output_clock)/3, str(self.core.pc_state)))
+                        print("clock:%s, %s"%((self.clocks.system_clock - self.stella._vsync_debug_output_clock)/3, str(self.core.pc_state)))
                         step_func()
                         state = self.get_save_state()
                         json.dump(state, fp)
@@ -128,4 +128,5 @@ class Atari(object):
                 while clk.system_clock < stop_clock:
                     step_func()
 
+        print(self.core.describe())
         print("Atari finished")

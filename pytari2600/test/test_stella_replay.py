@@ -59,7 +59,7 @@ class DummyInputs(object):
         pass
 
     def get_input7(self):
-        pass
+        return 0
 
     def step(self):
         pass
