@@ -4,6 +4,7 @@ from .memory import cartridge
 from . import clocks
 from . import inputs
 import json
+import os
 
 class Atari(object):
     def __init__(self, Graphics, audio, cpu):
@@ -103,13 +104,18 @@ class Atari(object):
 
                     # Save/restore state depending on key press.
                     if self.inputs.get_save_state_key():
+                        self.inputs.reset_save_state_key()
                         state = self.get_save_state()
                         with open(replay_file, 'w') as fp:
                             json.dump(state, fp)
                     elif self.inputs.get_restore_state_key():
-                        with open(replay_file, 'r') as fp:
-                            state = json.load(fp)
-                        self.set_save_state(state)
+                        self.inputs.reset_restore_state_key()
+                        if os.path.exists(replay_file):
+                            with open(replay_file, 'r') as fp:
+                                state = json.load(fp)
+                            self.set_save_state(state)
+                        else:
+                            print(('State file named "%s" Not Found.  Save state first.')%(replay_file))
 
         else:
             if 0 == stop_clock:
