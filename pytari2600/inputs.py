@@ -57,8 +57,14 @@ class Input(object):
     def get_save_state_key(self):
         return self._save_state
 
+    def reset_save_state_key(self):
+        self._save_state = 0x0
+
     def get_restore_state_key(self):
         return self._restore_state
+
+    def reset_restore_state_key(self):
+        self._restore_state = 0x0
 
     def handle_events(self, event):
         if event.type== pygame.KEYDOWN:
