@@ -96,8 +96,8 @@ class Input(object):
                 self.quit = 0x1
 
                 # TODO: find a better way to quit/stop pygame.
-                #pygame.quit()
-                #sys.exit()
+                pygame.quit()
+                sys.exit()
 
             # Custom key events
             elif event.key   == pygame.K_LEFTBRACKET:
