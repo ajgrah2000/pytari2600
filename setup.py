@@ -12,5 +12,5 @@ setup(name='pytari2600',
                 'pytari2600.test',
                 'pytari2600.audio'],
       package_dir={'pytari2600':'pytari2600'},
-      package_data={'pytari2600':['graphics/palette.dat','test/dummy_rom.bin']}
+      package_data={'pytari2600':['graphics/palette.pal.dat','graphics/palette.ntsc.dat','test/dummy_rom.bin']}
       )

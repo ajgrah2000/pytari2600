@@ -43,6 +43,8 @@ def run(args):
     (video, audio, cpu) = config(args.graphics_driver, args.audio_driver, args.cpu_driver)
 
     atari = atari2600.Atari(video, audio, cpu)
+
+    atari.set_palette(args.palette)
     atari.insert_cartridge(args.cartridge_name, args.cart_type)
 
     atari.power_on(args.stop_clock, args.no_delay, args.debug, args.replay_file, args.stella_record_file, args.record_audio_only)
@@ -64,6 +66,10 @@ def main():
                               'e', 'fe','super','f4', 'single_bank'], 
                               default='default',
                               help="Select the cartridge type of the rom being run (default is for 'common' bankswitching)")
+    parser.add_argument('-p', dest='palette', 
+                              choices=['ntsc', 'pal'], 
+                              default='ntsc',
+                              help="Select the palette to use (only changes color, not timing).")
     parser.add_argument('-g', dest='graphics_driver', 
                               choices=graphics_options.keys(), 
                               default='pygame',

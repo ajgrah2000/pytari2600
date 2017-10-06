@@ -491,11 +491,23 @@ class CollisionState(object):
 class Colors(object):
 
     def __init__(self):
-      self.colors = []
-      palette_file = pkg_resources.resource_stream(__name__, 'palette.dat')
-      for line in palette_file:
-          (r, g, b) = [int(x) for x in line.split()[0:3]]
-          self.colors.append(self.set_color(r, g, b))
+        self.set_palette("ntsc")
+
+    def set_palette(self, palette_type):
+        """ palette_type needs to match the file name, expected:
+            ntsc -> palette.ntsc.dat
+            or 
+            pal -> palette.pal.dat
+        """
+
+        palette_filename = "palette.%s.dat"%(palette_type)
+
+        self.colors = []
+
+        palette_file = pkg_resources.resource_stream(__name__, palette_filename)
+        for line in palette_file:
+            (r, g, b) = [int(x) for x in line.split()[0:3]]
+            self.colors.append(self.set_color(r, g, b))
 
     def fade_color(self, color):
         color  = (int(color[0] * 0.9), 
