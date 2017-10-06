@@ -74,9 +74,6 @@ class TestDrawing(unittest.TestCase):
         if 0 != grp:
             (number, size, gap) = stella.Stella.nusize(nusiz)
 
-            if resp < stella.Stella.HORIZONTAL_BLANK:
-                resp = stella.Stella.HORIZONTAL_BLANK
-
             for n in range(number):
                 bitfield = grp
                 # Scale the player.
@@ -84,7 +81,7 @@ class TestDrawing(unittest.TestCase):
                     for i in range(8):
                         # TODO: 'size/2' is a workaround for 'missile command'
                         # shifting of the explosion when size increases.
-                        pos = (resp - stella.Stella.HORIZONTAL_BLANK + int(size/2) + i*size + s + n * gap*8) % stella.Stella.FRAME_WIDTH & 0xFF
+                        pos = (resp + int(size/2) + i*size + s + n * gap*8) % stella.Stella.FRAME_WIDTH & 0xFF
 
                         if x == pos:
                             if (refp & 0x8) == 0:
@@ -132,7 +129,7 @@ class TestDrawing(unittest.TestCase):
                                 print (nusiz, grp, refp,  resp, x)
                             self.assertEqual(reference_update_player_draw,
                                              update_player_draw)
-        self.assertEqual(draw_count, 12791)
+        self.assertEqual(draw_count, 7656)
         self.assertEqual(all_count, len(test_nusiz) * 
                                     len(test_refp)  * 
                                     len(test_resp)  * 
