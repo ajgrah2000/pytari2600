@@ -183,7 +183,7 @@ class MissileState(object):
         self.resm   = 0
 
         # Derived state data (nominally generated during update)
-        self._number = 0
+        self._number = 1
         self._gap    = 0
 
         # Default scan to false.
@@ -253,9 +253,12 @@ class PlayerState(object):
 
         # Derived state data (nominally generated during update)
         self._grp     = 0
-        self._number  = 0
-        self._size    = 0
+        self._number  = 1
+        self._size    = 1
         self._gap     = 0
+        self._reflect = 0
+
+        self._grp_latch = 0
 
         self._pos_start = 0
 
@@ -361,7 +364,7 @@ class PlayerState(object):
             self._grp = self.pOld
 
         if 0 == self._grp:
-            self._scan_line = [False] * 160
+            self._scan_line = [False] * Stella.FRAME_WIDTH
         else:
             (number, size, gap) = Stella.nusize(self.nusiz)
             self._number = number
@@ -373,13 +376,19 @@ class PlayerState(object):
             else:
                 self._reflect = 0
 
-            self._pos_start = (self.resp + int(self._size/2))
+            self._pos_start = self.resp
             self._calc_player_scan()
 
     def _calc_player_scan(self):
         # Rotate the scan.
         rotation = Stella.FRAME_WIDTH-self._pos_start
-        scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp]
+
+        offset = 8*self._gap # First new '_grp'
+
+        # Use the 'latched' value for the first graphic 
+        scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp_latch][:offset]
+        scan += self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp][offset:]
+
         self._scan_line = scan[rotation:] + scan[:rotation]
                             
         
@@ -934,6 +943,19 @@ class Stella(object):
     
           current_y_line = display_lines[y]
           for x in range(x_start, x_stop):
+
+            # This is intended to 'latch' the previous graphic value, until the
+            # scan reaches 1 pixel before it needs to draw, then the data is
+            # updated.
+            if (x + 1) % Stella.FRAME_WIDTH == (self.p0_state._pos_start + 0)% Stella.FRAME_WIDTH :
+                self.p0_state._grp_latch = self.p0_state._grp
+                self.p0_state._calc_player_scan()
+                p0_scan = self.p0_state.get_player_scan()
+
+            if (x + 1) % Stella.FRAME_WIDTH == (self.p1_state._pos_start + 0)% Stella.FRAME_WIDTH :
+                self.p1_state._grp_latch = self.p1_state._grp
+                self.p1_state._calc_player_scan()
+                p1_scan = self.p1_state.get_player_scan()
     
             # TODO: Check the 'score' color application.
             #  pf color set to either 'p0' or 'p1' depending on which half of
