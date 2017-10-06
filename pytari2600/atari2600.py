@@ -92,50 +92,59 @@ class Atari(object):
         step_func = self.core.step
         quit_func = self.inputs.get_quit
 
-        if debug:
-            if 0 == stop_clock:
-                while 0 == quit_func():
-                    print("clock:%s, %s"%((self.clocks.system_clock - self.stella._vsync_debug_output_clock)/3, str(self.core.pc_state)))
-                    step_func()
-            else:
-                with open('debug.json', 'w') as fp:
-                    clk = self.clocks
-                    while clk.system_clock < stop_clock:
+        try:
+          if debug:
+              if 0 == stop_clock:
+                  while 0 == quit_func():
+                      print("clock:%s, %s"%((self.clocks.system_clock - self.stella._vsync_debug_output_clock)/3, str(self.core.pc_state)))
+                      step_func()
+              else:
+                  with open('debug.json', 'w') as fp:
+                      clk = self.clocks
+                      while clk.system_clock < stop_clock:
+  
+                          print("clock:%s, %s"%((self.clocks.system_clock - self.stella._vsync_debug_output_clock)/3, str(self.core.pc_state)))
+                          step_func()
+                          state = self.get_save_state()
+                          json.dump(state, fp)
+                          fp.write("\n");
+          elif replay_file:
+                  state = self.get_save_state()
+  
+                  while 0 == quit_func():
+                      step_func()
+  
+                      # Save/restore state depending on key press.
+                      if self.inputs.get_save_state_key():
+                          self.inputs.reset_save_state_key()
+                          state = self.get_save_state()
+                          with open(replay_file, 'w') as fp:
+                              json.dump(state, fp)
+                      elif self.inputs.get_restore_state_key():
+                          self.inputs.reset_restore_state_key()
+                          if os.path.exists(replay_file):
+                              with open(replay_file, 'r') as fp:
+                                  state = json.load(fp)
+                              self.set_save_state(state)
+                          else:
+                              print(('State file named "%s" Not Found.  Save state first.')%(replay_file))
+  
+          else:
+              if 0 == stop_clock:
+                  while 0 == quit_func():
+                      step_func()
+              else:
+                  clk = self.clocks
+                  while clk.system_clock < stop_clock:
+                      step_func()
+        except:
+            op_code = self.memory.read(self.pc_state.PC)
+            print "Exception on op code: 0x%02x"%(op_code)
+            print self.get_save_state()
+            raise
 
-                        print("clock:%s, %s"%((self.clocks.system_clock - self.stella._vsync_debug_output_clock)/3, str(self.core.pc_state)))
-                        step_func()
-                        state = self.get_save_state()
-                        json.dump(state, fp)
-                        fp.write("\n");
-        elif replay_file:
-                state = self.get_save_state()
-
-                while 0 == quit_func():
-                    step_func()
-
-                    # Save/restore state depending on key press.
-                    if self.inputs.get_save_state_key():
-                        self.inputs.reset_save_state_key()
-                        state = self.get_save_state()
-                        with open(replay_file, 'w') as fp:
-                            json.dump(state, fp)
-                    elif self.inputs.get_restore_state_key():
-                        self.inputs.reset_restore_state_key()
-                        if os.path.exists(replay_file):
-                            with open(replay_file, 'r') as fp:
-                                state = json.load(fp)
-                            self.set_save_state(state)
-                        else:
-                            print(('State file named "%s" Not Found.  Save state first.')%(replay_file))
-
-        else:
-            if 0 == stop_clock:
-                while 0 == quit_func():
-                    step_func()
-            else:
-                clk = self.clocks
-                while clk.system_clock < stop_clock:
-                    step_func()
+        finally:
+            pass
 
         print(self.core.describe())
         print("Atari finished")

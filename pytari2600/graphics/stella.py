@@ -386,8 +386,9 @@ class PlayerState(object):
         offset = 8*self._gap # First new '_grp'
 
         # Use the 'latched' value for the first graphic 
-        scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp_latch][:offset]
-        scan += self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp][offset:]
+#        scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp_latch][:offset]
+#        scan += self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp][offset:]
+        scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp_latch]
 
         self._scan_line = scan[rotation:] + scan[:rotation]
                             
@@ -903,7 +904,7 @@ class Stella(object):
 
     def _screen_scan(self, next_line, display_lines):
 
-      FUTURE_PIXELS = 1
+      FUTURE_PIXELS = 3
     
       last_screen_pos = self._last_screen_update_clock - self._screen_start_clock
       screen_pos      = self.clocks.system_clock       - self._screen_start_clock + FUTURE_PIXELS
@@ -947,12 +948,16 @@ class Stella(object):
             # This is intended to 'latch' the previous graphic value, until the
             # scan reaches 1 pixel before it needs to draw, then the data is
             # updated.
-            if (x + 1) % Stella.FRAME_WIDTH == (self.p0_state._pos_start + 0)% Stella.FRAME_WIDTH :
+            if (((x + 1) % Stella.FRAME_WIDTH == (self.p0_state._pos_start + 0)% Stella.FRAME_WIDTH) or
+               (((x - self.p0_state._gap*8) % Stella.FRAME_WIDTH) == (self.p0_state._pos_start + 0)% Stella.FRAME_WIDTH) or
+               (((x - self.p0_state._gap*16) % Stella.FRAME_WIDTH) == (self.p0_state._pos_start + 0)% Stella.FRAME_WIDTH) ):
                 self.p0_state._grp_latch = self.p0_state._grp
                 self.p0_state._calc_player_scan()
                 p0_scan = self.p0_state.get_player_scan()
 
-            if (x + 1) % Stella.FRAME_WIDTH == (self.p1_state._pos_start + 0)% Stella.FRAME_WIDTH :
+            if (((x + 1) % Stella.FRAME_WIDTH == (self.p1_state._pos_start + 0)% Stella.FRAME_WIDTH) or
+               ((x - self.p1_state._gap*8) % Stella.FRAME_WIDTH == (self.p1_state._pos_start + 0)% Stella.FRAME_WIDTH) or
+               ((x - self.p1_state._gap*16) % Stella.FRAME_WIDTH == (self.p1_state._pos_start + 0)% Stella.FRAME_WIDTH)):
                 self.p1_state._grp_latch = self.p1_state._grp
                 self.p1_state._calc_player_scan()
                 p1_scan = self.p1_state.get_player_scan()
