@@ -99,7 +99,7 @@ class PBCartridge(object):
             self.cartridge_banks[i] = self.max_cartridge[i]
 
         # Set default bank to the last bank.
-        self.current_bank = 0
+        self.current_bank = self.num_banks - 1
 
         print("PBCartridge read:")
         print(" banks =", self.num_banks)
@@ -216,7 +216,7 @@ class MNetworkCartridge(object):
               self.cartridge_banks[i] = self.max_cartridge[i]
     
             # Set default bank to the last bank.
-            self.current_bank = 0
+            self.current_bank = self.num_banks - 1
     
             print("MNetworkCartridge read:")
             print(" banks = ", self.num_banks)
@@ -297,7 +297,7 @@ class FECartridge(object):
               self.cartridge_banks[i] = self.max_cartridge[i]
 
             # Set default bank to the last bank.
-            self.current_bank = 0
+            self.current_bank = self.num_banks - 1
 
             print("Cartridge read:")
             print(" banks = ", self.num_banks)
@@ -462,7 +462,7 @@ class GenericCartridge(object):
               self.cartridge_banks[i] = self.max_cartridge[i]
 
             # Set default bank to the last bank.
-            self.current_bank = 0
+            self.current_bank = self.num_banks - 1
 
             print("Cartridge read:")
             print(" banks = ", self.num_banks)

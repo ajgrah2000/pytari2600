@@ -11,6 +11,14 @@ class Memory(object):
     def __init__(self):
         pass
 
+    def get_absolute_address(self, address):
+        if ((address & self.RIOT_MASK) == self.RIOT_ADDR):
+          absolute_address = address
+        else:
+          absolute_address = self.cartridge.get_absolute_address(address)
+
+        return absolute_address
+
     def get_save_state(self):
         state = {}
         state['cartridge'] = self.cartridge.get_save_state()

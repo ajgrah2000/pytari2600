@@ -382,6 +382,9 @@ class Instruction(object):
         if (a & 0xF00) != (b & 0xF00):
             self.clocks.system_clock += self.pc_state.CYCLES_TO_CLOCK
 
+    def describe(self):
+        return "%s, %s"%(self.__class__.__name__, self.instruction_exec.__doc__)
+
 class ReadWriteInstruction(Instruction):
     def __init__(self, clocks, pc_state, address, read, write, instruction_exec, additional_delay = 0):
         super(ReadWriteInstruction, self).__init__(clocks, pc_state, instruction_exec)

@@ -149,7 +149,7 @@ class TIA_Sound(object):
 class Stretch(object):
     def __init__(self):
         self.divisor           = 1000
-        self.rate              =  200
+        self.rate              = 1000
         self.remainder         =    0
         self.source_pos_offset =    0
 

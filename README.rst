@@ -62,11 +62,6 @@ pypy -m pytari2600 my_cbs_rom.bin
 
 Issues:
 
-'FUTURE_PIXELS' is used to scan ahead of the current time, effectively delays changes to graphics registers.  Unfortunately the delay are apparently register specific, and as roms use the registers differently, the delays matter.  I think it's only an issue for player graphics that are changed during the first 8 pixels after the 'resp' location. 
-
-Generally setting 'FUTURE_PIXELS' between 1-9 will be fairly stable for a particular rom, but is a fudge.
-
-
 TODO:
     - Speed improvements: On my machine, python + pygame runs ~ 1/3 of real-time
     - Audio with python. There are large delays in they way I'm handling audio,
@@ -81,6 +76,20 @@ TODO:
     - Pick another name, 'pytari' appears to be used for another python atari
       emulator, so 'pytari2600' isn't particularly original.
     - Ensure that creating the setup.py package hasn't broken anything.
+    - Find a better way to 'quit/stop' (currently harsh exit in
+      pytari2600/inputs.py), this was easiest mechanism that worked for tests
+      and normal usage.
+    - Fix remaining/known Stella emulation issues:
+        - Generally setting 'FUTURE_PIXELS' between 1-9 will be fairly stable for a particular rom, but is a fudge.
+        - Real Stella 'latches' the first graphic, reset is at end of line,
+          currently it's update 'immediately' (which is why FUTURE_PIXELS fudge
+          sometimes makes things look batter).
+        - HMOVE/Other writes have slightly different timing based on scan
+          location (currently not checking all cases, only '74th' cycle is
+          checked.)
+        - allow NTCS & PAL palette
+
+
 
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg

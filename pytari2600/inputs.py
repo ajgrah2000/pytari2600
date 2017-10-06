@@ -94,6 +94,8 @@ class Input(object):
                 self.input7 &= 0x7F
             elif event.key == pygame.K_q: # Dodgy quit
                 self.quit = 0x1
+
+                # TODO: find a better way to quit/stop pygame.
                 pygame.quit()
                 sys.exit()
 

@@ -19,6 +19,57 @@ class OpDecoder(object):
         instruction.execute() 
         self.execute = instruction.execute
 
+    def describe(self):
+        return ""
+
+    def executed(self):
+        return False
+
+class OpDecoderNoReplace(object):
+    """ Same as 'OpDecoder', but doesn't replace the instruction.
+        Suitable to use for self modifying code.  """
+    def __init__(self, pc_state, memory, instruction_lookup):
+        self.pc_state = pc_state
+        self.memory = memory
+        self.instruction_lookup = instruction_lookup
+        pass
+
+    def execute(self):
+        op_code = self.memory.read(self.pc_state.PC)
+        instruction = self.instruction_lookup[op_code].clone()
+
+        # Don't replace it's own instrucktion
+        instruction.execute() 
+
+    def describe(self):
+        return ""
+
+    def executed(self):
+        return False
+
+class OpDecoderInstrumenter(OpDecoderNoReplace):
+    def __init__(self, pc_state, memory, instruction_lookup):
+        super(OpDecoderInstrumenter, self).__init__(pc_state, memory, instruction_lookup)
+        self._execute_count = 0
+        self._instruction_descriptions = set()
+
+    def execute(self):
+        self._execute_count = self._execute_count + 1
+
+        op_code = self.memory.read(self.pc_state.PC)
+        instruction = self.instruction_lookup[op_code].clone()
+
+        # Don't replace it's own instrucktion
+        instruction.execute() 
+
+        self._instruction_descriptions.add(instruction.describe())
+
+    def describe(self):
+        return "count = %s, instructions: %s"%(self._execute_count, ",".join(list(self._instruction_descriptions)))
+
+    def executed(self):
+        return (self._execute_count != 0)
+
 class Core(object):
     """
         CPU Core - Contains op code mappings.
@@ -63,7 +114,12 @@ class Core(object):
         self.pc_state.PC = 0x1000
 
         # Generate instances of the op decoder
-        self.op_decoder = [OpDecoder(pc_state, memory, self.instruction_lookup) for x in range(0x10000)]
+        # Set 'ram' decoders to not replace themselves, as they can change.
+        self.op_decoder  = [OpDecoderNoReplace(pc_state, memory, self.instruction_lookup) for x in range(0x100)]
+        self.op_decoder += [OpDecoder(pc_state, memory, self.instruction_lookup) for x in range(0x100, 0x10000)]
+
+#        self.op_decoder  = [OpDecoderInstrumenter(pc_state, memory, self.instruction_lookup) for x in range(0x100)]
+#        self.op_decoder += [OpDecoderInstrumenter(pc_state, memory, self.instruction_lookup) for x in range(0x100, 0x10000)]
 
     def get_save_state(self):
         state = {}
@@ -82,7 +138,7 @@ class Core(object):
         self.populate_instruction_map()
 
     def step(self):
-        self.op_decoder[self.memory.cartridge.get_absolute_address(self.pc_state.PC)].execute()
+        self.op_decoder[self.memory.get_absolute_address(self.pc_state.PC)].execute()
 
     def populate_instruction_map(self):
         dummy = pc_state.PC_Register()
@@ -358,3 +414,12 @@ class Core(object):
 
         # SBX
         self.instruction_lookup[0xCB] = instructions.ReadWriteInstruction(self.clocks, self.pc_state, self.aIMM, self.r, self.nullW, self.instruction_exe.SBX_exec)
+
+    def describe(self):
+        info = ""
+
+        for (address, op) in enumerate(self.op_decoder):
+            if op.executed() != 0:
+                info += "0x%04x %s\n"%(address, op.describe())
+
+        return info

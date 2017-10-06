@@ -209,9 +209,6 @@ class MissileState(object):
         self._number = number
         self._gap    = gap
 
-        if self.resm < Stella.HORIZONTAL_BLANK:
-            self.resm = Stella.HORIZONTAL_BLANK
-
         self._calc_missile_scan()
 
     def update_nusiz(self, data):
@@ -238,7 +235,7 @@ class MissileState(object):
                 width = 1 << ((self.nusiz & 0x30) >> 4)
                 # Uses similar position to 'player'
                 for i in range(width):
-                    x = (i +self.resm + n*self._gap*8 - Stella.HORIZONTAL_BLANK) % Stella.FRAME_WIDTH 
+                    x = (i +self.resm + n*self._gap*8) % Stella.FRAME_WIDTH 
                     self._scan_line[x] = True
 
     def get_missile_scan(self):
@@ -371,14 +368,12 @@ class PlayerState(object):
             self._size   = size
             self._gap    = gap
 
-            if self.resp < Stella.HORIZONTAL_BLANK:
-                self.resp = Stella.HORIZONTAL_BLANK
             if (self.refp & 0x8) == 0:
                 self._reflect = 1
             else:
                 self._reflect = 0
 
-            self._pos_start = (self.resp - Stella.HORIZONTAL_BLANK + int(self._size/2))
+            self._pos_start = (self.resp + int(self._size/2))
             self._calc_player_scan()
 
     def _calc_player_scan(self):
@@ -454,7 +449,6 @@ class CollisionState(object):
         self._cxppmm = 0
 
     def update_collisions(self, p0, p1, m0, m1, bl, pf):
-
         if m0:
             if p1:
                 self._cxmp[0]  |= 0x80 # m0 & p1
@@ -550,6 +544,7 @@ class Stella(object):
     BLANK_OFF  = 0x0
 
     PF_PRIORITY = 0x4
+    PF_SCORE    = 0x2
 
     def __init__(self, clocks, inputs, AudioDriver):
         self.clocks = clocks
@@ -679,11 +674,16 @@ class Stella(object):
         elif 0xC == masked_address:
             result = self.inputs.get_input7()
         elif 0xD == masked_address:
-            result = self._inpt[5]
+            # Guessing at '0x80'
+            result = self._inpt[5] | 0x80
         else:
             print("Unknown stella read")
             result = 0
 
+        # TODO: Check values, 'noice_liquidcandy.bin' appears to require
+        # cxmp[0] to return 0x20 for correct font, guessing that '| address' is
+        # related.  I don't know what D0-D5 should read for collisions
+        result = result | address
         return result
 
     def write(self, address, data):
@@ -799,16 +799,28 @@ class Stella(object):
             self.playfield_state.update_pf2(data)
 
     def _STELLA_Write_Resp0(self, data):
-            self.p0_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
+            if (((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < Stella.HORIZONTAL_BLANK):
+                self.p0_state.update_resp(3)
+            else:
+                self.p0_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resp1(self, data):
-            self.p1_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
+            if (((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < Stella.HORIZONTAL_BLANK):
+                self.p1_state.update_resp(3)
+            else:
+                self.p1_state.update_resp((self.clocks.system_clock + 5 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resm0(self, data):
-            self.missile0.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
+            if (((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < Stella.HORIZONTAL_BLANK):
+                self.missile0.update_resm(3)
+            else:
+                self.missile0.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resm1(self, data):
-            self.missile1.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
+            if (((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS) < Stella.HORIZONTAL_BLANK):
+                self.missile1.update_resm(3)
+            else:
+                self.missile1.update_resm((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK)
 
     def _STELLA_Write_Resbl(self, data):
             self.ball.update_resbl((self.clocks.system_clock + 4 - self._screen_start_clock) % Stella.HORIZONTAL_TICKS)
@@ -906,11 +918,16 @@ class Stella(object):
           if y == y_stop:
             x_stop = last_x_stop
           else:
-            x_stop = self.FRAME_WIDTH - 1
+            x_stop = self.FRAME_WIDTH
     
           current_y_line = display_lines[y]
           for x in range(x_start, x_stop):
     
+            # TODO: Check the 'score' color application.
+            #  pf color set to either 'p0' or 'p1' depending on which half of
+            #  the screen is being draw.
+            # ie: if (0 == next_line.ctrlpf & self.PF_SCORE):
+
             pf = pf_scan[x]
             bl = bl_scan[x]
             m1 = m1_scan[x]
@@ -998,10 +1015,12 @@ class Stella(object):
         self.driver_draw_display()
 
     def _hmove(self):
-        self.p0_state.resp  = (self.p0_state.resp - self._hmove_clocks(self.nextLine.hmp[0])) % Stella.HORIZONTAL_TICKS
-        self.p1_state.resp  = (self.p1_state.resp - self._hmove_clocks(self.nextLine.hmp[1])) % Stella.HORIZONTAL_TICKS
-        self.missile0.resm  = (self.missile0.resm - self._hmove_clocks(self.nextLine.hmm[0])) % Stella.HORIZONTAL_TICKS
-        self.missile1.resm  = (self.missile1.resm - self._hmove_clocks(self.nextLine.hmm[1])) % Stella.HORIZONTAL_TICKS
+
+        self.p0_state.resp  = (self.p0_state.resp - self._hmove_clocks(self.nextLine.hmp[0])) % Stella.FRAME_WIDTH
+        self.p1_state.resp  = (self.p1_state.resp - self._hmove_clocks(self.nextLine.hmp[1])) % Stella.FRAME_WIDTH
+
+        self.missile0.resm  = (self.missile0.resm - self._hmove_clocks(self.nextLine.hmm[0])) % Stella.FRAME_WIDTH
+        self.missile1.resm  = (self.missile1.resm - self._hmove_clocks(self.nextLine.hmm[1])) % Stella.FRAME_WIDTH
         self.ball.resbl     = (self.ball.resbl - self._hmove_clocks(self.nextLine.hmbl)) % Stella.HORIZONTAL_TICKS
 
         self.p0_state.update()
@@ -1016,6 +1035,11 @@ class Stella(object):
         clock_shift = 0
         # 'hm >= 0x80' is negative move.
         clock_shift = ctypes.c_byte(hm).value >> 4
+        
+        # If hmove is on the '74th' CPU cycle of the scan line, special case.
+        if ((((self.clocks.system_clock - self._screen_start_clock) % Stella.HORIZONTAL_TICKS))/3 == 73):
+          clock_shift = clock_shift + 8
+
         return clock_shift
 
     def _write_vsync(self, data):
@@ -1053,4 +1077,65 @@ class Stella(object):
         if (self.clocks.system_clock - self._screen_start_clock) > 3:
           self.clocks.system_clock += Stella.HORIZONTAL_TICKS - (self.clocks.system_clock - self._screen_start_clock + FUDGE) % Stella.HORIZONTAL_TICKS 
 
+class StellaInstrumentRecord(object):
+    """ Record read/write calls, to allow replay/debugging.
+        Generated script can be run to replay.
+    """
+
+    @staticmethod
+    def instrumentStella(stella_instance, file_name, audio_only):
+        import StringIO
+        output = open(file_name, 'w')
+
+        output.write(StellaInstrumentRecord.stella_record_header())
+
+        def _decorator(func):
+          """ Debug decorator for stella """
+          def func_wrapper(*data):
+              if (audio_only == False):
+                output.write("# %s (%s)\n"%(func.__name__, func.__module__))
+                output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
+                output.write("stella_instance.%s%s\n"%(func.__name__, data))
+              return func(*data)
+          return func_wrapper
+
+        def _write_decorator(func):
+          """ Debug decorator specifically for stella write functions"""
+          def func_wrapper(*data):
+              comment_string = "%s (%s)"%(
+                      stella_instance._write_function[data[0] & 0x3F].__name__, 
+                      stella_instance._write_function[data[0] & 0x3F].__module__)
+              if ((data[0] & 0x3F) != data[0]):
+                comment_string  += " [address = %s]"%(data[0] & 0x3F)
+
+              if ((audio_only == False) or (("audio" in comment_string) or ("Vsync" in comment_string))):
+#                output.write("#%s\n"%(str(stella_instance.get_save_state())))
+                output.write("# %s\n"%(comment_string))
+                output.write("dummy_clock.system_clock = %s\n"%(stella_instance.clocks.system_clock))
+                output.write("stella_instance.%s%s\n"%(func.__name__, data))
+              return func(*data)
+          return func_wrapper
+
+        stella_instance.read  = _decorator(stella_instance.read )
+        stella_instance.write = _write_decorator(stella_instance.write)
+
+    @staticmethod
+    def stella_record_header():
+        return """
+# Debugging tip: To render 'partial' displays/check progress add
+#
+# stella_instance.driver_update_display() # Draw what's available.
+# time.sleep(5)
+#
+import time
+from pytari2600.test.test_stella_replay import DummyClocks as DummyClocks
+#from pytari2600.test.test_stella_replay import DummyAudio as DummyAudio
+from pytari2600.audio.pygameaudio import PygameStretchTIA_Sound as DummyAudio
+from pytari2600.test.test_stella_replay import DummyInputs as DummyInputs
+from pytari2600.graphics.pygamestella import PygameStella as stella
+
+dummy_clock = DummyClocks()
+dummy_inputs = DummyInputs()
+stella_instance = stella(dummy_clock, dummy_inputs, DummyAudio)
+"""
 
