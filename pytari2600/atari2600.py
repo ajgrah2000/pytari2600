@@ -19,6 +19,9 @@ class Atari(object):
 
         self.core.initialise()
 
+    def set_palette(self, palette_type):
+        self.stella.set_palette(palette_type)
+
     def insert_cartridge(self, cart_name, cart_type):
         if cart_type == 'pb':
             new_cart = cartridge.PBCartridge(cart_name)

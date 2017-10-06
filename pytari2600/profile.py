@@ -28,6 +28,7 @@ if cmd_args.rerun:
   pytari_args.graphics_driver='pygame'
   pytari_args.audio_driver='tia_dummy'
   pytari_args.cpu_driver='cpu_gen'
+  pytari_args.palette='ntsc'
   
   cProfile.run('pytari2600.run(pytari_args)','profile.stats')
   
