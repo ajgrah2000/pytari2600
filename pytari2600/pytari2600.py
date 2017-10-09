@@ -50,7 +50,11 @@ def run(args):
     atari.power_on(args.stop_clock, args.no_delay, args.debug, args.replay_file, args.stella_record_file, args.record_audio_only)
 
 def get_pytari2600_argparser():
-    parser = argparse.ArgumentParser(description='ATARI emulator')
+    parser = argparse.ArgumentParser(description='ATARI emulator', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    populate_pytari2600_argparser(parser)
+    return parser 
+
+def populate_pytari2600_argparser(parser):
     parser.add_argument('cartridge_name',            action='store')
     parser.add_argument('-d', dest='debug',          action='store_true')
     parser.add_argument('-r', '--replay_file', dest='replay_file', type=str,
@@ -84,7 +88,6 @@ def get_pytari2600_argparser():
                               help="Select an alternate CPU emulation, primarily to allow trying different optimisations.")
     parser.add_argument('-n', dest='no_delay',       action='store_true',
                               help="Wishful flag for when the emulator runs too fast.")
-    return parser 
 
 def main():
     parser = get_pytari2600_argparser()
