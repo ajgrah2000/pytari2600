@@ -19,8 +19,6 @@ def profile(profile_args):
   """ Run the c profiler using the specified arguments. 
   """
 
-  profile_args.stop_clock=8000000
-
   cProfile.runctx('pytari2600.run(profile_args)', 
                   globals={'pytari2600':pytari2600}, 
                   locals={'profile_args':profile_args}, 
@@ -59,8 +57,9 @@ def main():
 
 
   # The command to execute is selected by setting a different default function
-  # per command, to a common function name.
-  profile_args_parser.set_defaults(func=profile)
+  # per command, to a common function name. 
+  profile_args_parser.set_defaults(func=profile, stop_clock=8000000)
+
   report_args_parser.set_defaults(func=report)
   
   profiler_args = parser.parse_args()
