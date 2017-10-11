@@ -2,20 +2,27 @@ import ctypes
 import time
 import pkg_resources
 
+P1_MASK = 0x20
+P0_MASK = 0x10
+M1_MASK = 0x08
+M0_MASK = 0x04
+BL_MASK = 0x02
+PF_MASK = 0x01
+
 class PlayfieldState(object):
     """  Playfield state.
          It's updated infrequently, so generate an entire scan each update and
          return the lookup.
     """
 
-    def __init__(self):
+    def __init__(self, mask):
         self.pf0    = 0
         self.pf1    = 0
         self.pf2    = 0
         self.ctrlpf = 0
 
-        self._pf_lookup = [False] * Stella.FRAME_WIDTH
-        self._pre_calc_playfield()
+        self._pf_lookup = [0] * Stella.FRAME_WIDTH
+        self._pre_calc_playfield(mask)
 
     def get_save_state(self):
         state = {}
@@ -33,7 +40,7 @@ class PlayfieldState(object):
 
         self.update()
 
-    def _pre_calc_playfield(self):
+    def _pre_calc_playfield(self, scan_mask):
         """ Pre-calc playfield lists. 
 
             Bit order for displaying pf1 is reverse to pf0 & pf2.
@@ -46,11 +53,11 @@ class PlayfieldState(object):
         self._pf2_lookup = []
 
         for i in range(256):
-            pf_lookup = [False]*8
+            pf_lookup = [0]*8
             mask = 1
             for b in range(8):
                 if i & mask:
-                    pf_lookup[b] = True
+                    pf_lookup[b] = scan_mask
                 mask += mask
 
             # Expand to 4-pixels
@@ -97,7 +104,7 @@ class PlayfieldState(object):
 
 class BallState(object):
 
-    def __init__(self):
+    def __init__(self, mask):
         self.enabl     = 0
         self.enablOld  = 0
         self.vdelbl    = 0
@@ -109,7 +116,9 @@ class BallState(object):
 
         self._enabled  = False
 
-        self._scan_line = [False] * Stella.FRAME_WIDTH
+        self._mask = mask
+
+        self._scan_line = [0] * Stella.FRAME_WIDTH
 
     def get_save_state(self):
         state = {}
@@ -166,18 +175,18 @@ class BallState(object):
         """ Calculate an entire scanline for the ball, re-calculated on
         parameter change. """
         # Default scan to false.
-        self._scan_line = [False] * Stella.FRAME_WIDTH
+        self._scan_line = [0] * Stella.FRAME_WIDTH
 
         if self._enabled:
             for x in range(self._x_min, self._x_max):
-               self._scan_line[x % Stella.FRAME_WIDTH] = True
+               self._scan_line[x % Stella.FRAME_WIDTH] = self._mask
 
     def get_ball_scan(self):
         return self._scan_line
 
 class MissileState(object):
 
-    def __init__(self):
+    def __init__(self, mask):
         self.nusiz  = 0
         self.enam   = 0
         self.resm   = 0
@@ -186,8 +195,10 @@ class MissileState(object):
         self._number = 1
         self._gap    = 0
 
+        self._mask    = mask
+
         # Default scan to false.
-        self._scan_line = [False] * Stella.FRAME_WIDTH
+        self._scan_line = [0] * Stella.FRAME_WIDTH
 
     def get_save_state(self):
         state = {}
@@ -227,7 +238,7 @@ class MissileState(object):
         """ Pre-calculate an entire scan line, as update is called relatively
             infrequently. 
         """
-        self._scan_line = [False] * Stella.FRAME_WIDTH
+        self._scan_line = [0] * Stella.FRAME_WIDTH
 
         if self.enam & 0x02:
             for n in range(self._number):
@@ -236,13 +247,13 @@ class MissileState(object):
                 # Uses similar position to 'player'
                 for i in range(width):
                     x = (i +self.resm + n*self._gap*8) % Stella.FRAME_WIDTH 
-                    self._scan_line[x] = True
+                    self._scan_line[x] = self._mask
 
     def get_missile_scan(self):
         return self._scan_line
 
 class PlayerState(object):
-    def __init__(self, clocks):
+    def __init__(self, clocks, mask):
         self.nusiz  = 0
         self.p      = 0
         self.pOld   = 0
@@ -258,13 +269,11 @@ class PlayerState(object):
         self._gap     = 0
         self._reflect = 0
 
-        self._grp_latch = 0
-
         self._pos_start = 0
 
-        self._scan_line = [False] * Stella.FRAME_WIDTH
+        self._scan_line = [0] * Stella.FRAME_WIDTH
 
-        self._pre_calc_player()
+        self._pre_calc_player(mask)
 
     def get_save_state(self):
         state = {}
@@ -310,7 +319,7 @@ class PlayerState(object):
         self.vdelp = data
         self.update()
 
-    def _pre_calc_player(self):
+    def _pre_calc_player(self, mask):
         """ Precalculate all number, gap, size, graphic combinations. """
         self._player_scan_unshifted = []
 
@@ -339,10 +348,10 @@ class PlayerState(object):
                         self._player_scan_unshifted[number][size][gap].append([])
                         for g in range(GRAPHIC_RANGE):
                             # Create the 8-bit 'graphic'
-                            graphic = [False] * 8
+                            graphic = [0] * 8
                             for i in range(8):
                                 if (g >> i) & 0x01:
-                                    graphic[i] = True
+                                    graphic[i] = mask
 
                             if reflect:
                                 graphic.reverse()
@@ -350,7 +359,7 @@ class PlayerState(object):
                             # Scale the graphic, so each pixel is 'size' big
                             graphic = [x for x in graphic for _ in [0] * size]
 
-                            scan = [False] * Stella.FRAME_WIDTH
+                            scan = [0] * Stella.FRAME_WIDTH
                             for n in range(number):
                                 offset = n*gap*8
                                 scan[offset:offset + len(graphic)] = graphic
@@ -364,7 +373,7 @@ class PlayerState(object):
             self._grp = self.pOld
 
         if 0 == self._grp:
-            self._scan_line = [False] * Stella.FRAME_WIDTH
+            self._scan_line = [0] * Stella.FRAME_WIDTH
         else:
             (number, size, gap) = Stella.nusize(self.nusiz)
             self._number = number
@@ -383,12 +392,8 @@ class PlayerState(object):
         # Rotate the scan.
         rotation = Stella.FRAME_WIDTH-self._pos_start
 
-        offset = 8*self._gap # First new '_grp'
-
         # Use the 'latched' value for the first graphic 
-#        scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp_latch][:offset]
-#        scan += self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp][offset:]
-        scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp_latch]
+        scan = self._player_scan_unshifted[self._number][self._size][self._gap][self._reflect][self._grp]
 
         self._scan_line = scan[rotation:] + scan[:rotation]
                             
@@ -406,6 +411,16 @@ class LineState(object):
     self.hmp      = [0,0]
     self.hmm      = [0,0]
     self.hmbl     = 0
+
+    self._color_lookup = [default_color] * 256
+    self._hit_lookup = [True] * 256
+    self._hit_lookup[0] = False
+    self._hit_lookup[BL_MASK] = False
+    self._hit_lookup[P0_MASK] = False
+    self._hit_lookup[P1_MASK] = False
+    self._hit_lookup[M0_MASK] = False
+    self._hit_lookup[M1_MASK] = False
+    self._hit_lookup[PF_MASK] = False
 
   def get_save_state(self):
       state = {}
@@ -584,12 +599,12 @@ class Stella(object):
         self._is_update_time = True
 
         self.nextLine = LineState(self.default_color)
-        self.p0_state = PlayerState(self.clocks)
-        self.p1_state = PlayerState(self.clocks)
-        self.missile0 = MissileState()
-        self.missile1 = MissileState()
-        self.ball     = BallState()
-        self.playfield_state = PlayfieldState()
+        self.p0_state = PlayerState(self.clocks, P0_MASK)
+        self.p1_state = PlayerState(self.clocks, P1_MASK)
+        self.missile0 = MissileState(M0_MASK)
+        self.missile1 = MissileState(M1_MASK)
+        self.ball     = BallState(BL_MASK)
+        self.playfield_state = PlayfieldState(PF_MASK)
 
         self._display_lines = []
         for y in range(self.END_DRAW_Y - self.START_DRAW_Y + 1):
@@ -790,15 +805,26 @@ class Stella(object):
 
     def _STELLA_Write_Colump0(self, data):
             self.nextLine.pColor[0] = self._colors.get_color(data)
+            for i in range(PF_MASK | BL_MASK | P1_MASK | M1_MASK | P0_MASK | M0_MASK):
+                if (i & (P0_MASK | M0_MASK)):
+                    self.nextLine._color_lookup[i] = self.nextLine.pColor[0]
 
     def _STELLA_Write_Colump1(self, data):
             self.nextLine.pColor[1] = self._colors.get_color(data)
+            for i in range(PF_MASK | BL_MASK | P1_MASK | M1_MASK | P0_MASK | M0_MASK):
+                if ((i & (P1_MASK | M1_MASK)) and not (i & (P0_MASK | M0_MASK))):
+                    self.nextLine._color_lookup[i] = self.nextLine.pColor[1]
+
 
     def _STELLA_Write_Colupf(self, data):
             self.nextLine.playfieldColor = self._colors.get_color(data)
+            for i in range(PF_MASK | BL_MASK | P1_MASK | M1_MASK | P0_MASK | M0_MASK):
+                if ((i & (PF_MASK | BL_MASK)) and not (i & (P1_MASK | M1_MASK | P0_MASK | M0_MASK))):
+                    self.nextLine._color_lookup[i] = self.nextLine.playfieldColor
 
     def _STELLA_Write_Colubk(self, data):
             self.nextLine.backgroundColor = self._colors.get_color(data)
+            self.nextLine._color_lookup[0] = self.nextLine.backgroundColor
 
     def _STELLA_Write_Ctrlpf(self, data):
             self.nextLine.ctrlpf        = data
@@ -915,10 +941,8 @@ class Stella(object):
       if y_stop < (self.END_DRAW_Y - self.START_DRAW_Y):
 
         priority_ctrl = (0 == next_line.ctrlpf & self.PF_PRIORITY)
-        nl_pColor0  = next_line.pColor[0]
-        nl_pColor1  = next_line.pColor[1]
-        nl_pfColor  = next_line.playfieldColor
-        nl_bgColor  = next_line.backgroundColor
+        color_lookup = next_line._color_lookup
+        hit_lookup = next_line._hit_lookup
 
         p0_scan = self.p0_state.get_player_scan()
         p1_scan = self.p1_state.get_player_scan()
@@ -936,87 +960,22 @@ class Stella(object):
           last_x_stop = screen_pos % Stella.HORIZONTAL_TICKS - Stella.HORIZONTAL_BLANK
 
         for y in range(y_start, y_stop+1):
-    
           if y == y_stop:
             x_stop = last_x_stop
           else:
             x_stop = self.FRAME_WIDTH
-    
+
           current_y_line = display_lines[y]
+
           for x in range(x_start, x_stop):
 
-            # This is intended to 'latch' the previous graphic value, until the
-            # scan reaches 1 pixel before it needs to draw, then the data is
-            # updated.
-            if (((x + 1) % Stella.FRAME_WIDTH == (self.p0_state._pos_start + 0)% Stella.FRAME_WIDTH) or
-               (((x - self.p0_state._gap*8) % Stella.FRAME_WIDTH) == (self.p0_state._pos_start + 0)% Stella.FRAME_WIDTH) or
-               (((x - self.p0_state._gap*16) % Stella.FRAME_WIDTH) == (self.p0_state._pos_start + 0)% Stella.FRAME_WIDTH) ):
-                self.p0_state._grp_latch = self.p0_state._grp
-                self.p0_state._calc_player_scan()
-                p0_scan = self.p0_state.get_player_scan()
-
-            if (((x + 1) % Stella.FRAME_WIDTH == (self.p1_state._pos_start + 0)% Stella.FRAME_WIDTH) or
-               ((x - self.p1_state._gap*8) % Stella.FRAME_WIDTH == (self.p1_state._pos_start + 0)% Stella.FRAME_WIDTH) or
-               ((x - self.p1_state._gap*16) % Stella.FRAME_WIDTH == (self.p1_state._pos_start + 0)% Stella.FRAME_WIDTH)):
-                self.p1_state._grp_latch = self.p1_state._grp
-                self.p1_state._calc_player_scan()
-                p1_scan = self.p1_state.get_player_scan()
-    
-            # TODO: Check the 'score' color application.
-            #  pf color set to either 'p0' or 'p1' depending on which half of
-            #  the screen is being draw.
-            # ie: if (0 == next_line.ctrlpf & self.PF_SCORE):
-
-            pf = pf_scan[x]
-            bl = bl_scan[x]
-            m1 = m1_scan[x]
-            p1 = p1_scan[x]
-            m0 = m0_scan[x]
-            p0 = p0_scan[x]
-
-            # Priorities (bit 2 set):  Priorities (bit 2 clear):
-            #  PF, BL                   P0, M0
-            #  P0, M0                   P1, M1
-            #  P1, M1                   PF, BL
-            #  BK                       BK
-            pixelColor = nl_bgColor
-            hits = 0
-            if priority_ctrl:
-              if pf or bl: 
-                  pixelColor = nl_pfColor
-                  hits += bl + pf
-              if p1 or m1: 
-                  pixelColor = nl_pColor1
-                  hits += m1 + p1
-              if p0 or m0: 
-                  pixelColor = nl_pColor0
-                  hits += m0 + p0
-            else:
-              if p1 or m1: 
-                  pixelColor = nl_pColor1
-                  hits += m1 + p1
-              if p0 or m0: 
-                  pixelColor = nl_pColor0
-                  hits += m0 + p0
-              if pf or bl: 
-                  pixelColor = nl_pfColor
-                  hits += bl + pf
-
-            if hits > 1:
-                self._collision_state.update_collisions(p0, p1, m0, m1, bl, pf)
-
-#       Display scan 'start position'.
-#            ps0 = self.p0_state._pos_start
-#            ps1 = self.p1_state._pos_start
-#            if x == ps0:
-#                pixelColor = self._colors.get_color(2)
-#            if x == ps1:
-#                pixelColor = self._colors.get_color(3)
-#
-            current_y_line[x] = pixelColor
+            value = pf_scan[x] + bl_scan[x] + m1_scan[x] + p1_scan[x] + m0_scan[x] + p0_scan[x]
+            if hit_lookup[value]:
+              self._collision_state.update_collisions(value & P0_MASK, value & P1_MASK, value & M0_MASK, value & M1_MASK, value & BL_MASK, value & PF_MASK)
+            current_y_line[x] = color_lookup[value]
 
           x_start = 0
-    
+
       self._last_screen_update_clock = self.clocks.system_clock + FUTURE_PIXELS
 
     @staticmethod
