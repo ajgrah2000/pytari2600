@@ -123,6 +123,11 @@ TODO:
           location (currently not checking all cases, only '74th' cycle is
           checked.)
 
+    - Stella, try optimising:
+         by only performing pixel color an colision checks if graphics are enabled (ie missile).
+         Use bit positions for different pixel types, add arrays and lookups based on combined pixel patter.
+         
+
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
    :target: https://raw.githubusercontent.com/agraham/pytari2600/master/LICENSE
    :alt: MIT License

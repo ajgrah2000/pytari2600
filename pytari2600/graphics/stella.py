@@ -2,6 +2,7 @@ import ctypes
 import time
 import pkg_resources
 
+PRIORITY_MASK = 0x40
 P1_MASK = 0x20
 P0_MASK = 0x10
 M1_MASK = 0x08
@@ -413,6 +414,14 @@ class LineState(object):
     self.hmbl     = 0
 
     self._color_lookup = [default_color] * 256
+
+    self._indicies_c0 = []
+    self._indicies_c1 = []
+    self._indicies_pf = []
+    self._indicies_priority_c0 = []
+    self._indicies_priority_c1 = []
+    self._indicies_priority_pf = []
+
     self._hit_lookup = [True] * 256
     self._hit_lookup[0] = False
     self._hit_lookup[BL_MASK] = False
@@ -421,6 +430,37 @@ class LineState(object):
     self._hit_lookup[M0_MASK] = False
     self._hit_lookup[M1_MASK] = False
     self._hit_lookup[PF_MASK] = False
+
+    self._hit_lookup[PRIORITY_MASK] = False
+    self._hit_lookup[PRIORITY_MASK | BL_MASK] = False
+    self._hit_lookup[PRIORITY_MASK | P0_MASK] = False
+    self._hit_lookup[PRIORITY_MASK | P1_MASK] = False
+    self._hit_lookup[PRIORITY_MASK | M0_MASK] = False
+    self._hit_lookup[PRIORITY_MASK | M1_MASK] = False
+    self._hit_lookup[PRIORITY_MASK | PF_MASK] = False
+
+    self._pre_cal_color_lookups()
+
+  def _pre_cal_color_lookups(self):
+    """ Precalc indicies to use for color tables. """
+    for i in range(PF_MASK | BL_MASK | P1_MASK | M1_MASK | P0_MASK | M0_MASK):
+      if not (i & (~PF_MASK & ~BL_MASK & ~P1_MASK & ~M1_MASK & ~P0_MASK & ~M0_MASK)):
+        # Priority ctrl set
+        if (i & (P0_MASK | M0_MASK)):
+            self._indicies_priority_c0 += [i]
+        if ((i & (P0_MASK | M0_MASK)) and not (i & (PF_MASK | BL_MASK))):
+            self._indicies_c0 += [i]
+        # Priority ctrl set
+        if ((i & (P1_MASK | M1_MASK)) and not (i & (P0_MASK | M0_MASK))):
+            self._indicies_priority_c1 += [i]
+        if ((i & (P1_MASK | M1_MASK)) and not (i & (P0_MASK | M0_MASK | PF_MASK | BL_MASK))):
+            self._indicies_c1 += [i]
+        # Priority ctrl set
+        if ((i & (PF_MASK | BL_MASK)) and not (i & (P1_MASK | M1_MASK | P0_MASK | M0_MASK))):
+            self._indicies_priority_pf += [i]
+        if (i & (PF_MASK | BL_MASK)):
+            self._indicies_pf += [i]
+
 
   def get_save_state(self):
       state = {}
@@ -804,27 +844,31 @@ class Stella(object):
             self.missile1.update_nusiz(data)
 
     def _STELLA_Write_Colump0(self, data):
-            self.nextLine.pColor[0] = self._colors.get_color(data)
-            for i in range(PF_MASK | BL_MASK | P1_MASK | M1_MASK | P0_MASK | M0_MASK):
-                if (i & (P0_MASK | M0_MASK)):
-                    self.nextLine._color_lookup[i] = self.nextLine.pColor[0]
+        self.nextLine.pColor[0] = self._colors.get_color(data)
+
+        for i in self.nextLine._indicies_priority_c0:
+            self.nextLine._color_lookup[PRIORITY_MASK | i] = self.nextLine.pColor[0]
+        for i in self.nextLine._indicies_c0:
+            self.nextLine._color_lookup[i] = self.nextLine.pColor[0]
 
     def _STELLA_Write_Colump1(self, data):
-            self.nextLine.pColor[1] = self._colors.get_color(data)
-            for i in range(PF_MASK | BL_MASK | P1_MASK | M1_MASK | P0_MASK | M0_MASK):
-                if ((i & (P1_MASK | M1_MASK)) and not (i & (P0_MASK | M0_MASK))):
-                    self.nextLine._color_lookup[i] = self.nextLine.pColor[1]
-
+        self.nextLine.pColor[1] = self._colors.get_color(data)
+        for i in self.nextLine._indicies_c1:
+            self.nextLine._color_lookup[i] = self.nextLine.pColor[1]
+        for i in self.nextLine._indicies_priority_c1:
+            self.nextLine._color_lookup[PRIORITY_MASK | i] = self.nextLine.pColor[1]
 
     def _STELLA_Write_Colupf(self, data):
             self.nextLine.playfieldColor = self._colors.get_color(data)
-            for i in range(PF_MASK | BL_MASK | P1_MASK | M1_MASK | P0_MASK | M0_MASK):
-                if ((i & (PF_MASK | BL_MASK)) and not (i & (P1_MASK | M1_MASK | P0_MASK | M0_MASK))):
-                    self.nextLine._color_lookup[i] = self.nextLine.playfieldColor
+            for i in self.nextLine._indicies_priority_pf:
+                self.nextLine._color_lookup[PRIORITY_MASK | i] = self.nextLine.playfieldColor
+            for i in self.nextLine._indicies_pf:
+                self.nextLine._color_lookup[i] = self.nextLine.playfieldColor
 
     def _STELLA_Write_Colubk(self, data):
             self.nextLine.backgroundColor = self._colors.get_color(data)
             self.nextLine._color_lookup[0] = self.nextLine.backgroundColor
+            self.nextLine._color_lookup[PRIORITY_MASK] = self.nextLine.backgroundColor
 
     def _STELLA_Write_Ctrlpf(self, data):
             self.nextLine.ctrlpf        = data
@@ -940,7 +984,11 @@ class Stella(object):
 
       if y_stop < (self.END_DRAW_Y - self.START_DRAW_Y):
 
-        priority_ctrl = (0 == next_line.ctrlpf & self.PF_PRIORITY)
+        if (0 == next_line.ctrlpf & self.PF_PRIORITY):
+          priority_ctrl = PRIORITY_MASK
+        else:
+          priority_ctrl = 0
+
         color_lookup = next_line._color_lookup
         hit_lookup = next_line._hit_lookup
 
@@ -969,7 +1017,7 @@ class Stella(object):
 
           for x in range(x_start, x_stop):
 
-            value = pf_scan[x] + bl_scan[x] + m1_scan[x] + p1_scan[x] + m0_scan[x] + p0_scan[x]
+            value = pf_scan[x] | bl_scan[x] | m1_scan[x] | p1_scan[x] | m0_scan[x] | p0_scan[x] | priority_ctrl 
             if hit_lookup[value]:
               self._collision_state.update_collisions(value & P0_MASK, value & P1_MASK, value & M0_MASK, value & M1_MASK, value & BL_MASK, value & PF_MASK)
             current_y_line[x] = color_lookup[value]
