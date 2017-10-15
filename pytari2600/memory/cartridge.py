@@ -7,6 +7,7 @@ class Cartridge(object):
     def __init__(self, file_name):
 
         self._file_name = file_name
+        self.num_banks = 0
 
     def _chunks(self, l, n):
         for i in range(0, len(l), n):
@@ -29,7 +30,6 @@ class PBCartridge(Cartridge):
         self._slice[2] = 6
         self._slice[3] = 7
 
-        self.num_banks = 0
         self.current_bank = 0
 
         self._load_cartridge()
@@ -128,7 +128,6 @@ class MNetworkCartridge(Cartridge):
         self.bank_size = MNetworkCartridge.BANKSIZE
         self.ram_size  = MNetworkCartridge.RAMSIZE
 
-        self.num_banks = 0
         self.bank_select = 0
         self.ram_select = 0
 
@@ -238,7 +237,6 @@ class FECartridge(Cartridge):
         self.max_banks = max_banks
         self.bank_size = bank_size
         self.cartridge_banks = [[]] * self.max_banks
-        self.num_banks    = 0
         self.current_bank = 0
 
         self._load_cartridge()
@@ -317,7 +315,6 @@ class SingleBankCartridge(Cartridge):
 
         self.bank_size = bank_size
         self.cartridge_bank = [] 
-        self.num_banks    = 0
 
         self._load_cartridge()
 
@@ -383,7 +380,6 @@ class GenericCartridge(Cartridge):
         self.ram_addr_mask = 0xFFFF & (self.ram_size - 1)
         self.cartridge_banks = [[]] * self.max_banks
         self.ram = []
-        self.num_banks    = 0
         self.current_bank = 0
         self.bank_select  = 0
 
