@@ -2,11 +2,23 @@
     Implementations of different cartridge types.
 """
 
-class PBCartridge(object):
+class Cartridge(object):
+
+    def __init__(self, file_name):
+
+        self._file_name = file_name
+
+    def _chunks(self, l, n):
+        for i in range(0, len(l), n):
+            yield l[i:i+n]
+
+class PBCartridge(Cartridge):
     MAXBANKS = 8
     BANKSIZE = 0x0400
 
     def __init__(self, file_name):
+
+        super(PBCartridge, self).__init__(file_name)
 
         self.max_banks = PBCartridge.MAXBANKS
         self.bank_size = PBCartridge.BANKSIZE
@@ -20,8 +32,7 @@ class PBCartridge(object):
         self.num_banks = 0
         self.current_bank = 0
 
-        self._file_name = file_name
-        self._load_cartridge(file_name)
+        self._load_cartridge()
 
     def get_save_state(self):
         state = {}
@@ -70,14 +81,14 @@ class PBCartridge(object):
 
         return self.cartridge_banks[self._slice[(address & 0xC00) >> 10]][address & 0x3FF]
 
-    def _load_cartridge(self, filename):
+    def _load_cartridge(self):
         bytes_read = 0
         total_bytes_read = 0
 
         self.max_cartridge = [[]] * self.max_banks
 
-        print("Opening: ", filename)
-        with open(filename, 'rb') as rom_file:
+        print("Opening: ", self._file_name)
+        with open(self._file_name, 'rb') as rom_file:
 
             full = rom_file.read()
             for bank in self._chunks(full, self.bank_size):
@@ -105,16 +116,14 @@ class PBCartridge(object):
         print(" banks =", self.num_banks)
         print(" bytes =", total_bytes_read)
 
-    def _chunks(self, l, n):
-        for i in range(0, len(l), n):
-            yield l[i:i+n]
-
-class MNetworkCartridge(object):
+class MNetworkCartridge(Cartridge):
     MAXBANKS = 8
     BANKSIZE = 0x0800
     RAMSIZE  = 0x0800
 
     def __init__(self, file_name):
+        super(MNetworkCartridge, self).__init__(file_name)
+
         self.max_banks = MNetworkCartridge.MAXBANKS
         self.bank_size = MNetworkCartridge.BANKSIZE
         self.ram_size  = MNetworkCartridge.RAMSIZE
@@ -125,9 +134,7 @@ class MNetworkCartridge(object):
 
         self.ram = []
 
-        self._file_name = file_name
-
-        self._load_cartridge(file_name)
+        self._load_cartridge()
 
     def get_save_state(self):
         state = {}
@@ -191,16 +198,16 @@ class MNetworkCartridge(object):
 
         return byte
 
-    def _load_cartridge(self, filename):
+    def _load_cartridge(self):
         bytes_read = 0
         total_bytes_read = 0
 
         self.max_cartridge = [[]] * self.max_banks
 
-        print("Opening: ", filename)
+        print("Opening: ", self._file_name)
 
         self.ram = [] * self.RAMSIZE
-        with open(filename, 'rb') as rom_file:
+        with open(self._file_name, 'rb') as rom_file:
             full = rom_file.read()
             for bank in self._chunks(full, self.bank_size):
 
@@ -223,20 +230,18 @@ class MNetworkCartridge(object):
             print(" bytes = ", total_bytes_read)
             print(" first bank size = ", len(self.cartridge_banks[0]))
 
-    def _chunks(self, l, n):
-        for i in range(0, len(l), n):
-            yield l[i:i+n]
+class FECartridge(Cartridge):
 
-class FECartridge(object):
+    def __init__(self, max_banks, bank_size):
+        super(FECartridge, self).__init__(file_name)
 
-    def __init__(self, file_name, max_banks, bank_size):
         self.max_banks = max_banks
         self.bank_size = bank_size
         self.cartridge_banks = [[]] * self.max_banks
         self.num_banks    = 0
         self.current_bank = 0
 
-        self._load_cartridge(file_name)
+        self._load_cartridge()
 
     def get_save_state(self):
         state = {}
@@ -271,12 +276,12 @@ class FECartridge(object):
         elif 0x2000 == (address & 0x2000):
             self.current_bank = 0
 
-    def _load_cartridge(self, filename):
+    def _load_cartridge(self):
         total_bytes_read = 0
 
-        print("Opening:", filename)
+        print("Opening:", self._file_name)
 
-        with open(filename, 'rb') as rom_file:
+        with open(self._file_name, 'rb') as rom_file:
 
             self.max_cartridge = [[]] * self.max_banks
             full = rom_file.read()
@@ -304,19 +309,17 @@ class FECartridge(object):
             print(" bytes = ", total_bytes_read)
             print(" first bank size = ", len(self.cartridge_banks[0]))
 
-    def _chunks(self, l, n):
-        for i in range(0, len(l), n):
-            yield l[i:i+n]
-
-class SingleBankCartridge(object):
+class SingleBankCartridge(Cartridge):
     """ Simple, single bank cartridge, no bank switching. """
 
-    def __init__(self, file_name, bank_size):
+    def __init__(self,  bank_size):
+        super(SingleBankCartridge, self).__init__(file_name)
+
         self.bank_size = bank_size
         self.cartridge_bank = [] 
         self.num_banks    = 0
 
-        self._load_cartridge(file_name)
+        self._load_cartridge()
 
     def get_save_state(self):
         state = {}
@@ -335,12 +338,12 @@ class SingleBankCartridge(object):
     def write(self, address, data):
         pass
 
-    def _load_cartridge(self, filename):
+    def _load_cartridge(self):
         total_bytes_read = 0
 
-        print("Opening:", filename)
+        print("Opening:", self._file_name)
 
-        with open(filename, 'rb') as rom_file:
+        with open(self._file_name, 'rb') as rom_file:
 
             self.max_cartridge = [] 
             full = rom_file.read()
@@ -369,13 +372,10 @@ class SingleBankCartridge(object):
             print(" bytes = ", total_bytes_read)
             print(" first bank size = ", len(self.cartridge_bank))
 
-    def _chunks(self, l, n):
-        for i in range(0, len(l), n):
-            yield l[i:i+n]
-
-class GenericCartridge(object):
+class GenericCartridge(Cartridge):
 
     def __init__(self, file_name, max_banks, bank_size, hot_swap, ram_size):
+        super(GenericCartridge, self).__init__(file_name)
         self.max_banks = max_banks
         self.bank_size = bank_size
         self.hot_swap = hot_swap
@@ -386,9 +386,8 @@ class GenericCartridge(object):
         self.num_banks    = 0
         self.current_bank = 0
         self.bank_select  = 0
-        self._file_name = file_name
 
-        self._load_cartridge(file_name)
+        self._load_cartridge()
 
     def get_save_state(self):
         state = {}
@@ -427,12 +426,12 @@ class GenericCartridge(object):
         if (((self.hot_swap+1) - self.num_banks) <=  address) and ((self.hot_swap+1) >  address):
             self.current_bank = self.num_banks - ((self.hot_swap+1) - address)
 
-    def _load_cartridge(self, filename):
+    def _load_cartridge(self):
         total_bytes_read = 0
 
-        print("Opening:", filename)
+        print("Opening:", self._file_name)
 
-        with open(filename, 'rb') as rom_file:
+        with open(self._file_name, 'rb') as rom_file:
 
             if (self.ram_size > 0):
                 self.ram = [0] * self.ram_size
@@ -468,10 +467,6 @@ class GenericCartridge(object):
             print(" banks = ", self.num_banks)
             print(" bytes = ", total_bytes_read)
             print(" first bank size = ", len(self.cartridge_banks[0]))
-
-    def _chunks(self, l, n):
-        for i in range(0, len(l), n):
-            yield l[i:i+n]
 
 if __name__ == '__main__':
     import sys
