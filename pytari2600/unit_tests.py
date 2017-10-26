@@ -6,6 +6,7 @@ from .test.test_addressing   import *
 from .test.test_input        import *
 from .test.test_instructions import *
 from .test.test_tiasound     import *
+from .test.test_pc_state     import *
 import unittest
 
 if __name__ == '__main__':

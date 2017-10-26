@@ -67,9 +67,9 @@ class TestDrawing(unittest.TestCase):
             drawn = (bits & 0x1)
         return drawn
 
-    def reference_update_player(self, nusiz, grp, refp,  resp, x):
+    def reference_update_player(self, nusiz, grp, refp,  resp, x, value):
 
-        drawn = False
+        drawn = 0
 
         if 0 != grp:
             (number, size, gap) = stella.Stella.nusize(nusiz)
@@ -81,24 +81,25 @@ class TestDrawing(unittest.TestCase):
                     for i in range(8):
                         # TODO: 'size/2' is a workaround for 'missile command'
                         # shifting of the explosion when size increases.
-                        pos = (resp + int(size/2) + i*size + s + n * gap*8) % stella.Stella.FRAME_WIDTH & 0xFF
+                        #pos = (resp + int(size/2) + i*size + s + n * gap*8) % stella.Stella.FRAME_WIDTH & 0xFF
+                        pos = (resp + i*size + s + n * gap*8) % stella.Stella.FRAME_WIDTH & 0xFF
 
                         if x == pos:
                             if (refp & 0x8) == 0:
                                 # Check each bit
                                 if (bitfield << i) & 0x80:
-                                    drawn = True
+                                    drawn = value
                             else:
                                 # Check each bit
                                 if (bitfield >> i) & 0x01:
-                                    drawn = True
+                                    drawn = value
 
         return drawn
 
     def test_update_player(self):
         test_clocks = clocks.Clock()
         test_input = inputs.Input()
-        s = stella.PlayerState(test_clocks)
+        s = stella.PlayerState(test_clocks, stella.P1_MASK)
 
         test_nusiz = range(0,8)
         test_refp   = [0,0x8]
@@ -122,14 +123,14 @@ class TestDrawing(unittest.TestCase):
                             s.vdelp = 0 # Ignore for this test
                             s.update()
                             update_player_draw = s.get_player_scan()[x]
-                            reference_update_player_draw = self.reference_update_player(nusiz, grp, refp,  resp, x) 
+                            reference_update_player_draw = self.reference_update_player(nusiz, grp, refp,  resp, x, stella.P1_MASK) 
                             if update_player_draw:
                                 draw_count +=1
                             if reference_update_player_draw != update_player_draw:
                                 print (nusiz, grp, refp,  resp, x)
                             self.assertEqual(reference_update_player_draw,
                                              update_player_draw)
-        self.assertEqual(draw_count, 7656)
+        self.assertEqual(draw_count, 7660)
         self.assertEqual(all_count, len(test_nusiz) * 
                                     len(test_refp)  * 
                                     len(test_resp)  * 
@@ -139,7 +140,7 @@ class TestDrawing(unittest.TestCase):
     def test_update_playfield(self):
         test_clocks = clocks.Clock()
         test_input = inputs.Input()
-        s = stella.PlayfieldState()
+        s = stella.PlayfieldState(stella.PF_MASK)
 
         test_pf0    = [0,0x10,0x20,0x40,0x80]
         test_pf1    = [0,0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80]
