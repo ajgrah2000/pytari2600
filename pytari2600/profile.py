@@ -43,7 +43,7 @@ def main():
                       help="Name of the profile data file to create/read.")
   
   sub_parsers = parser.add_subparsers(help='Subparser commands.')
-  report_args_parser  = sub_parsers.add_parser('report',  help='Display profile report data')
+  report_args_parser  = sub_parsers.add_parser('report',  help='Display profile report data (-h for sub-command help)')
 
   profile_args_parser = sub_parsers.add_parser('profile', help='Generate new profile data.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -54,7 +54,6 @@ def main():
                             help="Output ordered by total time per function.")
   report_args_parser.add_argument('-c', dest='cumulative', action='store_true', default=False,
                             help="Output ordered by cumulative time per function.")
-
 
   # The command to execute is selected by setting a different default function
   # per command, to a common function name. 

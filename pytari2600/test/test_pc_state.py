@@ -1,7 +1,7 @@
 import pytari2600.cpu.pc_state as pc_state
 import unittest
 
-class TestAddressing(unittest.TestCase):
+class TestPC_State(unittest.TestCase):
 
     def test_pc_status(self):
         status_flags = pc_state.PC_StatusFlags()
