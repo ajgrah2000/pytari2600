@@ -139,8 +139,8 @@ class Atari(object):
                       step_func()
         except:
             op_code = self.memory.read(self.pc_state.PC)
-            print "Exception on op code: 0x%02x"%(op_code)
-            print self.get_save_state()
+            print("Exception on op code: 0x%02x"%(op_code))
+            print(self.get_save_state())
             raise
 
         finally:

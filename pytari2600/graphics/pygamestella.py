@@ -4,6 +4,7 @@ from . import stella
 # Import numpy, if it exists.
 try:
     import numpy
+    import pygame.surfarray
     has_numpy = True
 except:
     has_numpy = False
