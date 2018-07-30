@@ -18,6 +18,7 @@ The emulator is written based on information from the following documents:
 
 Module dependencies:
    pygame (1.9.1)
+   cyglfw (can be use instead of pygame)
    numpy (optional)
    pyglet (optional, not fully supported)
 
@@ -29,13 +30,13 @@ Run (show help):
    python -m pytari2600
 
    usage: pytari2600.py [-h] [-d] [-r REPLAY_FILE]
-                        [--stella_record_file STELLA_RECORD_FILE]
-                        [--record_audio_only] [-s STOP_CLOCK]
-                        [-c {default,pb,mnet,cbs,e,fe,super,f4,single_bank}]
-                        [-p {ntsc,pal}] [-g {pyglet,pygame}]
-                        [--cpu {cpu,cpu_gen}]
-                        [-a {oss_stretch,wav,oss,pygame,tia_dummy}] [-n]
-                        cartridge_name
+                      [--stella_record_file STELLA_RECORD_FILE]
+                      [--record_audio_only] [-s STOP_CLOCK]
+                      [-c {default,pb,mnet,cbs,e,fe,super,f4,single_bank}]
+                      [-p {ntsc,pal}] [-g {pyglet,cyglfw,pygame}]
+                      [--cpu {cpu,cpu_gen}]
+                      [-a {oss_stretch,wav,oss,pygame,tia_dummy}] [-n]
+                      cartridge_name
    
    ATARI emulator
    
@@ -47,28 +48,33 @@ Run (show help):
      -d
      -r REPLAY_FILE, --replay_file REPLAY_FILE
                            Json file to save/restore state. Triggered via '[',']'
-                           keys
+                           keys (default: None)
      --stella_record_file STELLA_RECORD_FILE
                            Stella record/replay output script file. Generates a
                            python script that can replay stella read/writes.
+                           (default: None)
      --record_audio_only   To be used in conjuction with '--stella_record_file',
                            records only the audio writes, allows audio only
-                           playback from tia.
+                           playback from tia. (default: False)
      -s STOP_CLOCK         Set a clock time to stop (useful for profiling),
-                           setting to '0' is disable stop
+                           setting to '0' is disable stop (default: 0)
      -c {default,pb,mnet,cbs,e,fe,super,f4,single_bank}
                            Select the cartridge type of the rom being run
-                           (default is for 'common' bankswitching)
+                           (default is for 'common' bankswitching) (default:
+                           default)
      -p {ntsc,pal}         Select the palette to use (only changes color, not
-                           timing).
-     -g {pyglet,pygame}    Select an alternate to graphics module
+                           timing). (default: ntsc)
+     -g {pyglet,cyglfw,pygame}
+                           Select an alternate to graphics module (default:
+                           pygame)
      --cpu {cpu,cpu_gen}   Select an alternate CPU emulation, primarily to allow
-                           trying different optimisations.
+                           trying different optimisations. (default: cpu_gen)
      -a {oss_stretch,wav,oss,pygame,tia_dummy}
                            Select an alternate CPU emulation, primarily to allow
-                           trying different optimisations.
+                           trying different optimisations. (default: tia_dummy)
      -n                    Wishful flag for when the emulator runs too fast.
-
+                           (default: False)
+   
 Keys
 ====
 arrow keys - move
