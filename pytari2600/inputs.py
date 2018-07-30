@@ -1,4 +1,3 @@
-import pygame
 import sys
 
 class Input(object):
@@ -66,64 +65,61 @@ class Input(object):
     def reset_restore_state_key(self):
         self._restore_state = 0x0
 
-    def handle_events(self, event):
-        if event.type== pygame.KEYDOWN:
-            if event.key   == pygame.K_UP:
+    def input_register_bits(self, action, key):
+        if action == self.EVENT_KEYDOWN:
+            if key   == self.KEY_UP:
                 self.swcha ^= 0x10
-            elif event.key == pygame.K_DOWN:
+            elif key == self.KEY_DOWN:
                 self.swcha ^= 0x20
-            elif event.key == pygame.K_LEFT:
+            elif key == self.KEY_LEFT:
                 self.swcha ^= 0x40
                 self.paddle0 = 1
-            elif event.key == pygame.K_RIGHT:
+            elif key == self.KEY_RIGHT:
                 self.swcha ^= 0x80
                 self.paddle0 = -1
-            elif event.key == pygame.K_s: # Game select
+            elif key == self.KEY_SELECT:
                 self.swchb ^= 0x1
-            elif event.key == pygame.K_r: # Game reset
+            elif key == self.KEY_RESET:
                 self.swchb ^= 0x2
-            elif event.key == pygame.K_1:
+            elif key == self.KEY_P0_DIFICULTY:
                 self.swchb ^= 0x40
                 print("P0 dificulty %s"%(("hard", "easy")[self.swchb & 0x40 != 0]))
-            elif event.key == pygame.K_2:
+            elif key == self.KEY_P1_DIFICULTY:
                 self.swchb ^= 0x80
                 print("P1 dificulty %s"%(("hard", "easy")[self.swchb & 0x80 != 0]))
-            elif event.key == pygame.K_c: # toggle black and white
+            elif key == self.KEY_BLACK_WHITE: # toggle black and white
                 self.swchb ^= 0x8
-            elif event.key == pygame.K_z: # toggle black and white
+            elif key == self.KEY_BUTTON: # toggle black and white
                 self.input7 &= 0x7F
-            elif event.key == pygame.K_q: # Dodgy quit
+            elif key == self.KEY_QUIT: # Dodgy quit
                 self.quit = 0x1
-
-                # TODO: find a better way to quit/stop pygame.
-                pygame.quit()
                 sys.exit()
 
             # Custom key events
-            elif event.key   == pygame.K_LEFTBRACKET:
+            elif key   == self.KEY_SAVE_STATE:
                 self._save_state = 0x1
-            elif event.key   == pygame.K_RIGHTBRACKET:
+            elif key   == self.KEY_RESTORE_STATE:
                 self._restore_state = 0x1
-        elif event.type== pygame.KEYUP:
-            if event.key   == pygame.K_UP:
+        elif action == self.EVENT_KEYUP:
+            if key   == self.KEY_UP:
                 self.swcha |= 0x10
-            elif event.key == pygame.K_DOWN:
+            elif key == self.KEY_DOWN:
                 self.swcha |= 0x20
-            elif event.key == pygame.K_LEFT:
+            elif key == self.KEY_LEFT:
                 self.swcha |= 0x40
                 self.paddle0 = 0
-            elif event.key == pygame.K_RIGHT:
+            elif key == self.KEY_RIGHT:
                 self.swcha |= 0x80
                 self.paddle0 = 0
-            elif event.key == pygame.K_s: # Game select
+            elif key == self.KEY_SELECT:
                 self.swchb |= 0x1
-            elif event.key == pygame.K_r: # Game reset
+            elif key == self.KEY_RESET:
                 self.swchb |= 0x2
-            elif event.key == pygame.K_z: # toggle black and white
+            elif key == self.KEY_BUTTON: # toggle black and white
                 self.input7 |= 0x80
 
             # Custom key events
-            elif event.key   == pygame.K_LEFTBRACKET:
+            elif key   == self.KEY_SAVE_STATE:
                 self._save_state = 0x0
-            elif event.key   == pygame.K_RIGHTBRACKET:
+            elif key   == self.KEY_RESTORE_STATE:
                 self._restore_state = 0x0

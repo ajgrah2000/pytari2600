@@ -17,7 +17,8 @@ audio_options = {
 # Possible graphics drivers
 graphics_options = {
     'pyglet': 'from pytari2600.graphics.pygletstella import PygletStella as Graphics',
-    'pygame': 'from pytari2600.graphics.pygamestella import PygameStella as Graphics'
+    'pygame': 'from pytari2600.graphics.pygamestella import PygameStella as Graphics',
+    'cyglfw': 'from pytari2600.graphics.cyglfwstella import CyglfwStella as Graphics'
     }
 
 # Possible graphics drivers

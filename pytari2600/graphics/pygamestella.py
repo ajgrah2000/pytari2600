@@ -42,13 +42,16 @@ class PygameStella(stella.Stella):
         else:
             self.driver_draw_display = self._draw_using_set_at
 
+        # Map input keys/events
+        self._map_input_events()
+
     def set_palette(self, palette_type):
         self._colors.set_palette(palette_type)
 
     def poll_events(self):
         # Handle events on diplay draw
         for event in pygame.event.get():
-          self.inputs.handle_events(event)
+          self.handle_events(event)
           self.tiasound.handle_events(event)
 
     def driver_open_display(self):
@@ -88,3 +91,28 @@ class PygameStella(stella.Stella):
             for x in range(self.FRAME_WIDTH):
                 self._background.set_at((x,y),  self._display_lines[y][x])
 
+    def _map_input_events(self):
+        self.inputs.EVENT_KEYDOWN     = pygame.KEYDOWN
+        self.inputs.EVENT_KEYUP       = pygame.KEYUP
+
+        self.inputs.KEY_UP            = pygame.K_UP
+        self.inputs.KEY_DOWN          = pygame.K_DOWN
+        self.inputs.KEY_LEFT          = pygame.K_LEFT
+        self.inputs.KEY_RIGHT         = pygame.K_RIGHT
+        self.inputs.KEY_SELECT        = pygame.K_s
+        self.inputs.KEY_RESET         = pygame.K_r
+        self.inputs.KEY_P0_DIFICULTY  = pygame.K_1
+        self.inputs.KEY_P1_DIFICULTY  = pygame.K_2
+        self.inputs.KEY_BLACK_WHITE   = pygame.K_c
+        self.inputs.KEY_BUTTON        = pygame.K_z
+        self.inputs.KEY_QUIT          = pygame.K_q
+        self.inputs.KEY_SAVE_STATE    = pygame.K_LEFTBRACKET
+        self.inputs.KEY_RESTORE_STATE = pygame.K_RIGHTBRACKET
+
+    def handle_events(self, event):
+        if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+          self.inputs.input_register_bits(event.type, event.key)
+
+        # TODO: find a better way to quit/stop pygame.
+        #pygame.quit()
+        #sys.exit()
