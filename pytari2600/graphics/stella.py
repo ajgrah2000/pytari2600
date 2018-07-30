@@ -597,6 +597,9 @@ class Stella(object):
 
         self.driver_open_display()
 
+    def set_palette(self, palette_type):
+        self._colors.set_palette(palette_type)
+
     def get_save_state(self):
         state = {}
         state['tiasound']  = self.tiasound.get_save_state()

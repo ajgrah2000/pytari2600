@@ -45,9 +45,6 @@ class PygameStella(stella.Stella):
         # Map input keys/events
         self._map_input_events()
 
-    def set_palette(self, palette_type):
-        self._colors.set_palette(palette_type)
-
     def poll_events(self):
         # Handle events on diplay draw
         for event in pygame.event.get():
