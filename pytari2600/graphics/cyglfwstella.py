@@ -13,14 +13,14 @@ class CyglfwColors(stella.Colors):
         super(CyglfwColors, self).__init__()
 
     def set_color(self, r, g, b):
-      return [r,g,b]
+      return r << 24 | g << 16 | b << 8
 
 class CyglfwStella(stella.Stella):
     """ GUI layer for stella.
     """
     def __init__(self, *args):
         # 'default_color' is used by stella init, need to set before super
-        self.default_color = [0,0,0]
+        self.default_color = 0
         self._colors = CyglfwColors()
         super(CyglfwStella, self).__init__(*args)
 
@@ -41,10 +41,10 @@ class CyglfwStella(stella.Stella):
 
     def driver_update_display(self):
         self._draw_display()
-        data = [x for line in reversed(self._display_lines[:self.FRAME_HEIGHT:]) for colors in line for x in colors]
+        data = [x for line in reversed(self._display_lines[:self.FRAME_HEIGHT:]) for x in line]
 
-        rawdata = (gl.GLubyte * len(data))(*data)
-        gl.glDrawPixels(stella.Stella.FRAME_WIDTH, stella.Stella.FRAME_HEIGHT, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, rawdata)
+        rawdata = (gl.GLuint * len(data))(*data)
+        gl.glDrawPixels(stella.Stella.FRAME_WIDTH, stella.Stella.FRAME_HEIGHT, gl.GL_RGBA, gl.GL_UNSIGNED_INT_8_8_8_8, rawdata)
         gl.glPixelZoom(self.PIXEL_WIDTH, self.PIXEL_HEIGHT)
 
         if not glfw.WindowShouldClose(window):
@@ -56,6 +56,9 @@ class CyglfwStella(stella.Stella):
         pass
 
     def cyglfw_key_callback(self, window, key, scancode, action, mods):
+        # TODO: Key callback with GLFW 3.2.1 appears to add extra 'press,
+        # repeat and release' after a repeat event.
+        print "key %d %d %d %d"%(key, scancode, action, mods)
         self.inputs.input_register_bits(action, key)
 
         # TODO: find a better way to quit/stop pygame.
