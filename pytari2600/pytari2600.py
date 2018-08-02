@@ -1,5 +1,5 @@
 """ Entry point for the atari emulator.
-    Intended to work with python3, python2, pypy, pygame, pyglet (although no input, so can't play).
+    Intended to work with python3, python2, pypy, pygame, pyglet, cyglfw3.
 """
 
 import argparse

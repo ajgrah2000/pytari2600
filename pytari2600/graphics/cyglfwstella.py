@@ -58,7 +58,6 @@ class CyglfwStella(stella.Stella):
     def cyglfw_key_callback(self, window, key, scancode, action, mods):
         # TODO: Key callback with GLFW 3.2.1 appears to add extra 'press,
         # repeat and release' after a repeat event.
-        print "key %d %d %d %d"%(key, scancode, action, mods)
         self.inputs.input_register_bits(action, key)
 
         # TODO: find a better way to quit/stop pygame.

@@ -23,18 +23,26 @@ class PygletStella(stella.Stella):
         self._colors = PygletColors()
         super(PygletStella, self).__init__(*args)
 
+        self.KEY_PRESS_ENUM = 0
+        self.KEY_RELEASE_ENUM = 1
+
+        # Map input keys/events
+        self._map_input_events()
+
     def poll_events(self):
         pass
 
     def driver_open_display(self):
         # Enable alpha blending, required for image.blit.
-#        glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         window.width  = stella.Stella.BLIT_WIDTH 
         window.height = stella.Stella.BLIT_HEIGHT
         window.set_visible()
         pyglet.gl.glScalef(self.PIXEL_WIDTH, self.PIXEL_HEIGHT, 1.0)
+
+        window.push_handlers(self.on_key_press)
+        window.push_handlers(self.on_key_release)
 
     def driver_update_display(self):
         self._draw_display()
@@ -51,3 +59,27 @@ class PygletStella(stella.Stella):
 
     def driver_draw_display(self):
         pass
+
+    def on_key_press(self, symbol, modifiers):
+        self.inputs.input_register_bits(self.KEY_PRESS_ENUM, symbol)
+
+    def on_key_release(self, symbol, modifiers):
+        self.inputs.input_register_bits(self.KEY_RELEASE_ENUM, symbol)
+
+    def _map_input_events(self):
+        self.inputs.EVENT_KEYDOWN     = self.KEY_PRESS_ENUM
+        self.inputs.EVENT_KEYUP       = self.KEY_RELEASE_ENUM
+                                        
+        self.inputs.KEY_UP            = pyglet.window.key.UP
+        self.inputs.KEY_DOWN          = pyglet.window.key.DOWN
+        self.inputs.KEY_LEFT          = pyglet.window.key.LEFT
+        self.inputs.KEY_RIGHT         = pyglet.window.key.RIGHT
+        self.inputs.KEY_SELECT        = pyglet.window.key.S
+        self.inputs.KEY_RESET         = pyglet.window.key.R
+        self.inputs.KEY_P0_DIFICULTY  = pyglet.window.key._1
+        self.inputs.KEY_P1_DIFICULTY  = pyglet.window.key._2
+        self.inputs.KEY_BLACK_WHITE   = pyglet.window.key.C
+        self.inputs.KEY_BUTTON        = pyglet.window.key.Z
+        self.inputs.KEY_QUIT          = pyglet.window.key.Q
+        self.inputs.KEY_SAVE_STATE    = pyglet.window.key.BRACKETLEFT
+        self.inputs.KEY_RESTORE_STATE = pyglet.window.key.BRACKETRIGHT

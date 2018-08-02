@@ -17,10 +17,8 @@ The emulator is written based on information from the following documents:
   http://www.atariage.com/2600/archives/schematics_tia/index.html
 
 Module dependencies:
-   pygame (1.9.1)
-   cyglfw (can be use instead of pygame)
+   pygame (1.9.1) or cyglfw or pyglet
    numpy (optional)
-   pyglet (optional, not fully supported)
 
 Create package:
    python setup.py sdist
