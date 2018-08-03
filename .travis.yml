@@ -21,6 +21,7 @@ install:
         virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
         source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
       fi
+  - "pip install --upgrade setuptools"
   - "pip install -r requirements.txt"
 script:
     coverage run --source=pytari2600 -m pytari2600.unit_tests
