@@ -2,6 +2,17 @@ import cyglfw3 as glfw
 from OpenGL import GL as gl
 from . import stella
 
+# Import numpy, if it exists.
+try:
+    import numpy
+    import pygame.surfarray
+    has_numpy = True
+except:
+    has_numpy = False
+finally:
+    pass
+
+
 if not glfw.Init():
     exit()
 
@@ -35,15 +46,22 @@ class CyglfwStella(stella.Stella):
             glfw.Terminate()
             exit()
 
+        if has_numpy:
+          # Replayce the 'display_lines' with a numpy array.
+          self._display_lines = numpy.array(self._display_lines)
+
         glfw.MakeContextCurrent(window)
 
         glfw.SetKeyCallback(window, self.cyglfw_key_callback)
 
     def driver_update_display(self):
         self._draw_display()
-        data = [x for line in reversed(self._display_lines[:self.FRAME_HEIGHT:]) for x in line]
+        if has_numpy:
+            rawdata = self._display_lines[self.FRAME_HEIGHT::-1].flatten()
+        else:
+            data = [x for line in reversed(self._display_lines[:self.FRAME_HEIGHT:]) for x in line]
+            rawdata = (gl.GLuint * len(data))(*data)
 
-        rawdata = (gl.GLuint * len(data))(*data)
         gl.glDrawPixels(stella.Stella.FRAME_WIDTH, stella.Stella.FRAME_HEIGHT, gl.GL_RGBA, gl.GL_UNSIGNED_INT_8_8_8_8, rawdata)
         gl.glPixelZoom(self.PIXEL_WIDTH, self.PIXEL_HEIGHT)
 
