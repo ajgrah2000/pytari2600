@@ -34,7 +34,7 @@ class PygameStella(stella.Stella):
         # Test if 'PixelArray' is part of pygame
         # pygame_cffi, may not have PixelArray
 
-        if has_numpy:
+        if has_numpy and hasattr(pygame, 'surfarray'):
             # Use a faster blit with a numpy array, if available.      
             self.driver_draw_display = self._draw_using_numpy_array
         elif hasattr(pygame, 'PixelArray'):

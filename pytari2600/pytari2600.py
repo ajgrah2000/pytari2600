@@ -7,6 +7,7 @@ from . import atari2600
 
 # Possible audio drivers
 audio_options = {
+    'sounddevice':      'from pytari2600.audio.sounddeviceaudio import SoundDeviceSound as AudioDriver',
     'pygame':      'from pytari2600.audio.pygameaudio import PygameStretchTIA_Sound as AudioDriver',
     'wav':         'from pytari2600.audio.testaudio import WAV_TIA_Sound as AudioDriver',
     'oss':         'from pytari2600.audio.testaudio import OSS_TIA_Sound as AudioDriver',
