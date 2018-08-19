@@ -5,7 +5,7 @@ class SoundDeviceSound(tiasound.TIA_Sound):
     """ Sound, output to the 'sounddevice' module.
     """
 
-    BLOCKSIZE=1024
+    BLOCKSIZE=2048
 
     def __init__(self, clocks):
         super(SoundDeviceSound, self).__init__(clocks)
@@ -15,14 +15,12 @@ class SoundDeviceSound(tiasound.TIA_Sound):
         self._next_buffer_0 = bytearray([0,0])
         self._next_buffer_1 = bytearray([0,0])
 
-        self._next_buffer_stretch_0 = [0] * self.BLOCKSIZE
-        self._next_buffer_stretch_1 = [0] * self.BLOCKSIZE
+        self._next_buffer_stretch_0 = bytearray([0] * self.BLOCKSIZE)
+        self._next_buffer_stretch_1 = bytearray([0] * self.BLOCKSIZE)
 
         self._last_update_time = self.clocks.system_clock
 
         self.openSound()
-
-        print self.stretch([1,2,3,5], 7)
 
     def openSound(self):
         self.stream = sounddevice.Stream(channels=2, blocksize=self.BLOCKSIZE, samplerate=self.SAMPLERATE,callback=self.fill_me, finished_callback=self.finished_callback)
@@ -55,12 +53,14 @@ class SoundDeviceSound(tiasound.TIA_Sound):
     def stretch(self, unstretched_source, final_length):
         # Stretch source to end up with length 'final_length'
         source_pos = 0
-        source_pos_remainder = 0
 
         stretched_result = []
 
         remainder = len(unstretched_source) % final_length
         diviser = int(len(unstretched_source)/final_length)
+
+        # Initialise it to part way through to change where the 'kinks' are.
+        source_pos_remainder = remainder/2
 
         while len(stretched_result) < final_length:
             stretched_result.append(unstretched_source[source_pos])
@@ -75,12 +75,13 @@ class SoundDeviceSound(tiasound.TIA_Sound):
 
     def fill_me(self, indata, outdata, frames, time, status):
         if status:
-            print status
-            print status.output_underflow
+            print(status)
+            print(status.output_underflow)
+
         outdata[:,0] = self._next_buffer_stretch_0
         outdata[:,1] = self._next_buffer_stretch_1
-        self._next_buffer_0 = [0]
-        self._next_buffer_1 = [0]
+        self._next_buffer_0 = bytearray([0])
+        self._next_buffer_1 = bytearray([0])
 
     def finished_callback(self):
         print("Audio stream finished")

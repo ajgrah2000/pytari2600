@@ -46,6 +46,8 @@ class OSS_TIA_Sound(tiasound.TIA_Sound):
         self._raw_audio = [[],[]]
 
     def openSound(self):
+        import ossaudiodev
+
         self._audio_device = ossaudiodev.open('w')
         self._audio_device.nonblock()
         self._audio_device.setparameters(ossaudiodev.AFMT_U8, 2, 32050)
@@ -76,6 +78,8 @@ class OSS_StretchTIA_Sound(tiasound.TIA_Sound):
         self._stretched =  [[],[]]
 
     def openSound(self):
+        import ossaudiodev
+
         self._audio_device = ossaudiodev.open('w')
         self._audio_device.nonblock()
         self._audio_device.setparameters(ossaudiodev.AFMT_U8, 2, 32050)

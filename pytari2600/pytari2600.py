@@ -33,8 +33,8 @@ def config(graphics_selection, audio_selection, cpu_selection):
     # Imports only occur 'on-demand' so missing dependencies cause issues
     # unless you attempt to use them.
     exec_locals= {}
-    exec(audio_options[audio_selection], {}, exec_locals)
     exec(graphics_options[graphics_selection], {}, exec_locals)
+    exec(audio_options[audio_selection], {}, exec_locals)
     exec(cpu_options[cpu_selection], {}, exec_locals)
 
     return (exec_locals['Graphics'], 
